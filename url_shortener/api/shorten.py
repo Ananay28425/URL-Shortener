@@ -2,7 +2,7 @@ from typing import List
 
 from fastapi import APIRouter, Depends, Request, status
 
-from url_shortener.core.rate_limit import InMemoryRateLimiter
+from url_shortener.core.rate_limit import RateLimiter
 from url_shortener.models.schemas import URLCreateRequest, URLResponse, URLSummary
 from url_shortener.services.url_service import URLService
 
@@ -13,7 +13,7 @@ def get_url_service(request: Request) -> URLService:
     return request.app.state.url_service
 
 
-def get_rate_limiter(request: Request) -> InMemoryRateLimiter:
+def get_rate_limiter(request: Request) -> RateLimiter:
     return request.app.state.rate_limiter
 
 
@@ -22,7 +22,7 @@ async def create_short_url(
     payload: URLCreateRequest,
     request: Request,
     url_service: URLService = Depends(get_url_service),
-    rate_limiter: InMemoryRateLimiter = Depends(get_rate_limiter),
+    rate_limiter: RateLimiter = Depends(get_rate_limiter),
 ) -> URLResponse:
     await rate_limiter.enforce(request)
     record = await url_service.create_short_url(payload)

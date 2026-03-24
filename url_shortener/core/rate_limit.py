@@ -1,34 +1,41 @@
 from __future__ import annotations
 
-from collections import defaultdict, deque
-from datetime import datetime, timedelta, timezone
-from typing import Deque, Dict
+from typing import Protocol
 
 from fastapi import HTTPException, Request, status
 
 from url_shortener.core.config import Settings
+from url_shortener.db.valkey import ValkeyManager
 
 
-class InMemoryRateLimiter:
-    """Simple fixed-window rate limiter used for anonymous clients."""
+class RateLimiter(Protocol):
+    async def enforce(self, request: Request) -> None:
+        ...
 
-    def __init__(self, settings: Settings):
+
+class NoOpRateLimiter:
+    async def enforce(self, request: Request) -> None:
+        return None
+
+
+class ValkeyRateLimiter:
+    """Shared fixed-window rate limiter backed by Valkey."""
+
+    def __init__(self, settings: Settings, valkey_manager: ValkeyManager):
         self.settings = settings
-        self._requests: Dict[str, Deque[datetime]] = defaultdict(deque)
+        self.valkey_manager = valkey_manager
 
     async def enforce(self, request: Request) -> None:
-        identifier = request.headers.get("x-forwarded-for") or (request.client.host if request.client else "anonymous")
-        now = datetime.now(timezone.utc)
-        window_start = now - timedelta(seconds=self.settings.rate_limit_window)
-        timestamps = self._requests[identifier]
-
-        while timestamps and timestamps[0] < window_start:
-            timestamps.popleft()
-
-        if len(timestamps) >= self.settings.anonymous_rate_limit:
+        identifier = request.headers.get("x-forwarded-for") or (
+            request.client.host if request.client else "anonymous"
+        )
+        is_allowed, _ = await self.valkey_manager.rate_limit_check(
+            identifier=identifier,
+            limit=self.settings.anonymous_rate_limit,
+            window=self.settings.rate_limit_window,
+        )
+        if not is_allowed:
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 detail="Rate limit exceeded",
             )
-
-        timestamps.append(now)

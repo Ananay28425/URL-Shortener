@@ -1,19 +1,18 @@
 from __future__ import annotations
 
-from collections import defaultdict
 from datetime import datetime, timezone
-from typing import Dict, List
 
 from fastapi import Request
 
 from url_shortener.models.schemas import AnalyticsAggregate, ClickEvent, URLRecord
+from url_shortener.repositories.analytics_repository import AnalyticsRepository
 
 
 class AnalyticsService:
     """Collects click metadata for shortened URLs."""
 
-    def __init__(self) -> None:
-        self._events: Dict[str, List[ClickEvent]] = defaultdict(list)
+    def __init__(self, repository: AnalyticsRepository) -> None:
+        self.repository = repository
 
     async def track_click(self, url: URLRecord, request: Request) -> ClickEvent:
         user_agent = request.headers.get("user-agent")
@@ -29,23 +28,24 @@ class AnalyticsService:
         browser = self._detect_browser(user_agent)
         os_name = self._detect_os(user_agent)
 
-        event = ClickEvent(
+        return await self.repository.create_event(
+            url_id=url.id,
             timestamp=datetime.now(timezone.utc),
             ip_address=ip_address,
             referer=referer,
             user_agent=user_agent,
+            country=None,
+            city=None,
             browser=browser,
-            os=os_name,
+            os_name=os_name,
             device_type=device_type,
         )
-        self._events[url.short_code].append(event)
-        return event
 
     async def get_analytics(self, url: URLRecord) -> AnalyticsAggregate:
-        return AnalyticsAggregate(url=url, clicks=list(self._events.get(url.short_code, [])))
+        return AnalyticsAggregate(url=url, clicks=await self.repository.list_events(url.id))
 
     async def delete_analytics(self, short_code: str) -> None:
-        self._events.pop(short_code, None)
+        await self.repository.delete_events_for_short_code(short_code)
 
     def _detect_device(self, user_agent: str | None) -> str:
         agent = (user_agent or "").lower()
