@@ -72,6 +72,29 @@ pip install -r requirements.txt
 uvicorn url_shortener.main:app --reload
 ```
 
+### Frontend dashboard
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The frontend expects the FastAPI backend at `http://localhost:8000` by default. Override this with `VITE_API_BASE_URL` if needed.
+
+### Docker Compose
+
+```bash
+cd infra
+docker compose up
+```
+
+This starts:
+
+- FastAPI backend on `http://localhost:8000`
+- Vite frontend on `http://localhost:3000`
+
+## API endpoints
 The API will start at `http://localhost:8000` by default.
 
 ## Quick demo flow
