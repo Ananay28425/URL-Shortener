@@ -69,6 +69,7 @@ class AnalyticsResponse(BaseModel):
 
 
 class URLRecord(BaseModel):
+    id: int
     short_code: str
     original_url: str
     created_at: datetime

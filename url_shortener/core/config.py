@@ -1,4 +1,5 @@
 from functools import lru_cache
+from pathlib import Path
 from typing import List
 
 from pydantic import Field
@@ -30,12 +31,21 @@ class Settings(BaseSettings):
     anonymous_rate_limit: int = 30
     default_rate_limit: int = 100
     rate_limit_window: int = 3600
+    database_url: str = Field(
+        default_factory=lambda: f"sqlite+aiosqlite:///{Path.cwd() / 'url_shortener.db'}"
+    )
+    valkey_url: str | None = None
     allowed_origins: List[str] = Field(
         default_factory=lambda: ["http://localhost:3000", "http://localhost:8080"]
     )
 
     def normalized_base_domain(self) -> str:
         return self.base_domain.rstrip("/")
+
+    def get_database_url_async(self) -> str:
+        if self.database_url.startswith("postgresql://"):
+            return self.database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return self.database_url
 
 
 @lru_cache(maxsize=1)
