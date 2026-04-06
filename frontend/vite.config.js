@@ -6,6 +6,6 @@ export default defineConfig({
   plugins: [react()],
   // Allow requests proxied from preview/deployment host used by Vercel/Playground
   server: {
-    allowedHosts: ['sb-1p51ca1cjnp9.vercel.run']
+    allowedHosts: ['*.vercel.run']
   }
 })
