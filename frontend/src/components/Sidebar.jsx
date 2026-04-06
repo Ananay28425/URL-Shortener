@@ -1,25 +1,45 @@
-import React from 'react'
-import { NavLink } from 'react-router-dom'
-import { Home, BarChart2, PlusSquare, Clock } from 'lucide-react'
+import { BarChart3, Home, Link2, X } from 'lucide-react'
+import { Link, useLocation } from 'react-router-dom'
 
-export default function Sidebar(){
+const items = [
+  { to: '/dashboard', icon: Home, label: 'Overview' },
+  { to: '/dashboard', icon: Link2, label: 'Links' },
+  { to: '/analytics/demo-1', icon: BarChart3, label: 'Analytics' }
+]
+
+export default function Sidebar({ mobileOpen, onClose }) {
+  const location = useLocation()
+
   return (
-    <aside className="hidden lg:block w-64 sticky top-20 h-[calc(100vh-5rem)] p-4">
-      <div className="card p-4 h-full flex flex-col gap-6">
-        <nav className="flex flex-col gap-2">
-          <NavLink to="/dashboard" className={({isActive})=>`flex items-center gap-3 p-2 rounded-lg ${isActive? 'bg-white/6 text-white':'text-slate-300 hover:bg-white/3'}`}>
-            <Home size={16} /> <span className="text-sm">Overview</span>
-          </NavLink>
-          <NavLink to="/dashboard" className={({isActive})=>`flex items-center gap-3 p-2 rounded-lg ${isActive? 'bg-white/6 text-white':'text-slate-300 hover:bg-white/3'}`}>
-            <BarChart2 size={16} /> <span className="text-sm">Analytics</span>
-          </NavLink>
+    <>
+      <aside className="hidden h-fit w-full max-w-xs rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl lg:block">
+        <p className="mb-3 text-xs uppercase tracking-[0.2em] text-brand-slate">Workspace</p>
+        <nav className="space-y-2">
+          {items.map(({ to, icon: Icon, label }) => (
+            <Link key={label} to={to} className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition ${location.pathname === to ? 'bg-white/10 text-white' : 'text-brand-muted hover:bg-white/5 hover:text-white'}`}>
+              <Icon size={16} /> {label}
+            </Link>
+          ))}
         </nav>
+      </aside>
 
-        <div className="mt-auto">
-          <div className="text-xs text-slate-400">Performance</div>
-          <div className="mt-2 text-white font-medium">99.99% uptime</div>
+      {mobileOpen && (
+        <div className="fixed inset-0 z-40 bg-black/60 lg:hidden">
+          <aside className="h-full w-72 border-r border-white/10 bg-brand-bgSoft p-4">
+            <div className="mb-4 flex items-center justify-between">
+              <p className="text-sm font-semibold">Navigation</p>
+              <button onClick={onClose} className="btn-secondary p-2"><X size={14} /></button>
+            </div>
+            <nav className="space-y-2">
+              {items.map(({ to, icon: Icon, label }) => (
+                <Link key={label} to={to} onClick={onClose} className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition ${location.pathname === to ? 'bg-white/10 text-white' : 'text-brand-muted hover:bg-white/5 hover:text-white'}`}>
+                  <Icon size={16} /> {label}
+                </Link>
+              ))}
+            </nav>
+          </aside>
         </div>
-      </div>
-    </aside>
+      )}
+    </>
   )
 }

@@ -1,62 +1,33 @@
-import React, { useState } from 'react'
-import { shortenUrl } from '../services/api'
-import { Copy } from 'lucide-react'
-import copyToClipboard from '../utils/copyToClipboard'
-import { useToast } from './ToastProvider'
+import { useState } from 'react'
+import GradientButton from './GradientButton'
+import CopyButton from './CopyButton'
 
-export default function UrlForm(){
+export default function UrlForm({ onSubmit, loading, result }) {
   const [url, setUrl] = useState('')
-  const [alias, setAlias] = useState('')
-  const [result, setResult] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [copied, setCopied] = useState(false)
+  const [customAlias, setCustomAlias] = useState('')
 
-  async function handleSubmit(e){
-    e && e.preventDefault()
-    if(!url) return
-    setLoading(true)
-    try{
-      const payload = await shortenUrl({ url, customAlias: alias })
-      setResult(payload)
-      const short = payload.shortUrl || (payload.shortId ? `${window.location.origin}/${payload.shortId}` : '')
-      addToast({ title: 'Short URL created', message: short, type: 'success' })
-    }catch(err){
-      console.error(err)
-      addToast({ title: 'Failed', message: err.message || 'Could not shorten URL', type: 'error' })
-    }finally{ setLoading(false) }
-  }
-
-  const { addToast } = useToast()
-  async function handleCopy(){
-    if(!result) return
-    const value = result.shortUrl || (result.shortId ? `${window.location.origin}/${result.shortId}` : '')
-    const ok = await copyToClipboard(value)
-    if(ok) addToast({ title: 'Copied', message: value, type: 'success' })
-    else addToast({ title: 'Copy failed', message: 'Unable to copy', type: 'error' })
+  async function handleSubmit(e) {
+    e.preventDefault()
+    if (!url.trim()) return
+    await onSubmit({ url: url.trim(), customAlias: customAlias.trim() || undefined })
   }
 
   return (
-    <div className="card p-4 max-w-2xl">
-      <form onSubmit={handleSubmit} className="grid gap-3">
-        <label className="text-sm text-slate-300">Long URL</label>
-        <input value={url} onChange={e=>setUrl(e.target.value)} placeholder="https://example.com/very/long/url" className="w-full p-3 rounded-lg bg-black/30 border border-white/6 text-white" />
-
-        <div className="flex gap-3">
-          <input value={alias} onChange={e=>setAlias(e.target.value)} placeholder="custom-alias (optional)" className="flex-1 p-3 rounded-lg bg-black/30 border border-white/6 text-white" />
-          <button type="submit" className="px-4 py-3 rounded-lg bg-gradient-to-tr from-indigo-500 to-cyan-400 text-black font-semibold">{loading? 'Shortening…' : 'Shorten'}</button>
-        </div>
+    <div className="glass-card p-5 sm:p-6">
+      <form className="grid gap-3" onSubmit={handleSubmit}>
+        <input value={url} onChange={(e) => setUrl(e.target.value)} className="input-dark" placeholder="Paste a long URL" />
+        <input value={customAlias} onChange={(e) => setCustomAlias(e.target.value)} className="input-dark" placeholder="Custom alias (optional)" />
+        <GradientButton type="submit" disabled={loading}>{loading ? 'Creating…' : 'Shorten URL'}</GradientButton>
       </form>
 
-      {result && (
-        <div className="mt-4 p-3 rounded-lg bg-white/3 border border-white/6 flex items-center justify-between">
-          <div>
-            <div className="text-slate-300 text-sm">Short URL</div>
-            <div className="font-mono text-white">{result.shortUrl || `${result.shortId ? `${window.location.origin}/${result.shortId}` : ''}`}</div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button onClick={handleCopy} className="p-2 rounded-md bg-white/6">
-              <Copy size={16} />
-            </button>
+      {result?.shortUrl && (
+        <div className="mt-4 rounded-xl border border-brand-success/30 bg-brand-success/10 p-3">
+          <p className="text-xs text-brand-muted">Generated short URL</p>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <a href={result.shortUrl} target="_blank" rel="noreferrer" className="font-mono text-sm text-brand-text underline-offset-4 hover:underline">
+              {result.shortUrl}
+            </a>
+            <CopyButton value={result.shortUrl} compact />
           </div>
         </div>
       )}

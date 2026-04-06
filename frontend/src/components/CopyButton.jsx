@@ -1,19 +1,27 @@
-import React from 'react'
-import { Copy } from 'lucide-react'
+import { useState } from 'react'
+import { Check, Copy } from 'lucide-react'
 import copyToClipboard from '../utils/copyToClipboard'
-import { useToast } from './ToastProvider'
 
-export default function CopyButton({ text }){
-  const { addToast } = useToast()
-  async function handle(){
-    const ok = await copyToClipboard(text)
-    if(ok) addToast({ title: 'Copied to clipboard', message: text, type: 'success' })
-    else addToast({ title: 'Copy failed', message: 'Unable to copy to clipboard', type: 'error' })
+export default function CopyButton({ value, className = '', compact = false }) {
+  const [copied, setCopied] = useState(false)
+
+  async function onCopy() {
+    if (!value) return
+    const ok = await copyToClipboard(value)
+    if (ok) {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1600)
+    }
   }
+
   return (
-    <button onClick={handle} className="p-2 rounded-md bg-white/6 flex items-center gap-2">
-      <Copy size={14} />
-      <span className="text-slate-300 text-sm">Copy</span>
+    <button
+      type="button"
+      onClick={onCopy}
+      className={`inline-flex items-center gap-2 rounded-lg border border-white/15 bg-white/5 ${compact ? 'px-2 py-1.5 text-xs' : 'px-3 py-2 text-sm'} transition hover:bg-white/10 ${className}`}
+    >
+      {copied ? <Check size={15} className="text-brand-success" /> : <Copy size={15} className="text-brand-muted" />}
+      <span>{copied ? 'Copied' : 'Copy'}</span>
     </button>
   )
 }

@@ -1,7 +1,5 @@
-export default function truncateUrl(url, max = 60) {
-  if (!url) return ''
+export default function truncateUrl(url, max = 50) {
+  if (!url) return '—'
   if (url.length <= max) return url
-  const start = url.slice(0, Math.round(max * 0.6))
-  const end = url.slice(-Math.round(max * 0.3))
-  return `${start}…${end}`
+  return `${url.slice(0, max)}…`
 }

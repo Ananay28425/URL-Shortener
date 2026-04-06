@@ -1,23 +1,18 @@
-import React from 'react'
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 'recharts'
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 
-export default function TopUrlsChart({ data = [] }){
-  const colors = ['#8b5cf6','#06b6d4','#6366f1','#06b6d4']
+export default function TopUrlsChart({ data }) {
   return (
-    <div className="card p-4">
-      <div className="text-slate-300 text-sm">Top Performing Links</div>
-      <div style={{width:'100%', height:240}} className="mt-4">
-        <ResponsiveContainer>
-          <BarChart data={data} layout="vertical">
-            <XAxis type="number" tick={{fill:'rgba(255,255,255,0.6)'}}/>
-            <YAxis dataKey="shortId" type="category" tick={{fill:'rgba(255,255,255,0.8)'}} width={160}/>
-            <Tooltip contentStyle={{background:'#0b0f19', border:'1px solid rgba(255,255,255,0.06)'}} itemStyle={{color:'#fff'}}/>
-            <Bar dataKey="clicks" barSize={14} radius={[6,6,6,6]}>
-              {data.map((entry, idx) => <Cell key={idx} fill={colors[idx % colors.length]} />)}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+    <div className="glass-card h-[340px] p-4">
+      <h3 className="mb-4 text-sm uppercase tracking-widest text-red-300">Performance breakdown</h3>
+      <ResponsiveContainer width="100%" height="90%">
+        <BarChart data={data}>
+          <CartesianGrid stroke="rgba(239,68,68,0.25)" strokeDasharray="3 3" />
+          <XAxis dataKey="shortId" stroke="#fff" fontSize={12} />
+          <YAxis stroke="#fff" fontSize={12} />
+          <Tooltip contentStyle={{ background: '#080808', border: '1px solid rgba(239,68,68,0.5)', borderRadius: 4, color: '#fff' }} />
+          <Bar dataKey="clicks" fill="#dc2626" radius={[2, 2, 0, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
     </div>
   )
 }

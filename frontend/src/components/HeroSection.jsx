@@ -1,38 +1,34 @@
-import React from 'react'
-import UrlForm from './UrlForm'
-import FeatureCard from './FeatureCard'
+import { motion } from 'framer-motion'
+import GradientButton from './GradientButton'
+import { Link } from 'react-router-dom'
 
-export default function HeroSection(){
+export default function HeroSection() {
   return (
-    <section className="max-w-7xl mx-auto px-4 py-16">
-      <div className="grid gap-10 lg:grid-cols-2 items-center">
-        <div>
-          <p className="text-sm font-semibold text-indigo-300">Shorten • Track • Scale</p>
-          <h1 className="mt-4 text-4xl md:text-5xl font-extrabold text-white leading-tight">Shorten Links. Track Everything. Scale Beautifully.</h1>
-          <p className="mt-4 text-slate-300 max-w-xl">Generate clean short links, monitor click analytics, and manage URL performance with a premium, production-style dashboard.</p>
-
-          <div className="mt-8">
-            <UrlForm />
-          </div>
-
-          <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <FeatureCard icon="zap" title="Fast Redirects" desc="Ultra low-latency redirects with global edge support." />
-            <FeatureCard icon="bar" title="Real-Time Analytics" desc="Live insights and historical trends for every link." />
-            <FeatureCard icon="shield" title="Secure & Scalable" desc="Rate-limits, custom aliases, and enterprise-grade security." />
-          </div>
-        </div>
-
-        <div className="relative">
-          <div className="card p-8 shadow-xl" style={{background: 'linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))'}}>
-            <div className="text-slate-300">Live Preview</div>
-            <div className="mt-4">
-              <div className="w-full h-56 rounded-xl bg-gradient-to-br from-white/3 to-white/2 border border-white/6 flex items-center justify-center">
-                <div className="text-center text-slate-300">Analytics snapshot and trend visual here.
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+    <section className="relative overflow-hidden px-4 pb-10 pt-12">
+      <div className="mx-auto max-w-5xl text-left">
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-4 text-xs uppercase tracking-[0.3em] text-red-300">
+          {`> scalable • analytics • terminal mode`}
+        </motion.p>
+        <motion.h1
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45 }}
+          className="text-4xl font-bold tracking-tight text-white sm:text-5xl"
+        >
+          Shorten Links. Track Everything.
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mt-5 max-w-3xl text-sm leading-7 text-white/80 sm:text-base"
+        >
+          Command-center UI for link operations with real-time metrics, strong visual hierarchy, and production-ready workflows.
+        </motion.p>
+        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="mt-8 flex items-center gap-3">
+          <Link to="/dashboard"><GradientButton>Open Dashboard</GradientButton></Link>
+          <Link to="/login" className="btn-secondary">Sign in</Link>
+        </motion.div>
       </div>
     </section>
   )

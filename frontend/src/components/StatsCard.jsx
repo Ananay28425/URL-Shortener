@@ -1,15 +1,21 @@
-import React from 'react'
+export default function StatsCard({ label, value, hint, icon: Icon, tone = 'default' }) {
+  const tones = {
+    default: 'border-red-500/50',
+    success: 'border-green-500/45',
+    warning: 'border-amber-500/45',
+    info: 'border-red-400/55'
+  }
 
-export default function StatsCard({ icon, label, value, trend }){
   return (
-    <div className="card p-4">
-      <div className="flex items-center justify-between">
+    <article className={`glass-card p-4 ${tones[tone]}`}>
+      <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="text-sm text-slate-300">{label}</div>
-          <div className="mt-1 text-2xl font-bold text-white">{value}</div>
+          <p className="text-xs uppercase tracking-wide text-white/70">{label}</p>
+          <p className="mt-2 text-2xl font-bold tracking-tight text-white">{value}</p>
+          {hint && <p className="mt-1 text-xs text-white/60">{hint}</p>}
         </div>
-        {trend && <div className={`text-sm ${trend.startsWith('+') ? 'text-emerald-400' : 'text-rose-400'}`}>{trend}</div>}
+        {Icon ? <Icon size={16} className="text-red-300" /> : null}
       </div>
-    </div>
+    </article>
   )
 }

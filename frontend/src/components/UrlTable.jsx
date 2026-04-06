@@ -1,47 +1,48 @@
-import React from 'react'
+import { BarChart3, Trash2 } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import formatDate from '../utils/formatDate'
 import truncateUrl from '../utils/truncateUrl'
-import { Copy, BarChart2, Trash2, ExternalLink } from 'lucide-react'
-import copyToClipboard from '../utils/copyToClipboard'
-import { useNavigate } from 'react-router-dom'
-import { useToast } from './ToastProvider'
+import CopyButton from './CopyButton'
 
-export default function UrlTable({ items = [], onDelete }){
-  const nav = useNavigate()
-  const { addToast } = useToast()
-
+export default function UrlTable({ items, onDelete }) {
   return (
-    <div className="table-wrap card p-4">
-      <table className="min-w-full">
-        <thead>
-          <tr className="text-slate-400 text-sm">
-            <th>Short</th>
-            <th>Original</th>
-            <th>Clicks</th>
-            <th>Created</th>
-            <th>Status</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.map(i=> (
-            <tr key={i.shortId} className="hover:bg-white/3 transition-colors">
-              <td className="py-3 align-top"><div className="font-mono text-white">{i.shortUrl || `${window.location.origin}/${i.shortId}`}</div></td>
-              <td className="py-3 align-top text-slate-300">{truncateUrl(i.url)}</td>
-              <td className="py-3 align-top">{i.clicks ?? 0}</td>
-              <td className="py-3 align-top text-slate-400">{formatDate(i.created_at)}</td>
-              <td className="py-3 align-top"><span className={`px-2 py-1 rounded text-sm ${i.status === 'active' ? 'bg-emerald-600/20 text-emerald-300' : 'bg-rose-600/20 text-rose-300'}`}>{i.status}</span></td>
-              <td className="py-3 align-top">
-                <div className="flex gap-2">
-                  <button onClick={async()=>{ const v = i.shortUrl || `${window.location.origin}/${i.shortId}`; const ok = await copyToClipboard(v); if(ok) addToast({ title: 'Copied', message: v, type: 'success' }) }} className="p-2 rounded-md bg-white/6"><Copy size={14} /></button>
-                  <button onClick={()=>nav(`/analytics/${i.shortId}`)} className="p-2 rounded-md bg-white/6"><BarChart2 size={14} /></button>
-                  <button onClick={async()=>{ try{ if(onDelete) await onDelete(i.shortId); addToast({ title: 'Deleted', message: 'Short URL removed', type: 'success' }) }catch(e){ addToast({ title: 'Delete failed', message: e.message || '', type: 'error' }) } }} className="p-2 rounded-md bg-white/6 text-rose-300"><Trash2 size={14} /></button>
-                </div>
-              </td>
+    <div className="glass-card overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="min-w-full text-sm">
+          <thead className="border-b border-white/10 bg-white/5 text-left text-brand-slate">
+            <tr>
+              <th className="px-4 py-3 font-medium">Short URL</th>
+              <th className="px-4 py-3 font-medium">Original URL</th>
+              <th className="px-4 py-3 font-medium">Clicks</th>
+              <th className="px-4 py-3 font-medium">Created Date</th>
+              <th className="px-4 py-3 font-medium">Status</th>
+              <th className="px-4 py-3 font-medium">Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {items.map((item) => (
+              <tr key={item.id || item.shortId} className="border-b border-white/5">
+                <td className="px-4 py-3 font-mono text-xs sm:text-sm">{item.shortUrl}</td>
+                <td className="px-4 py-3 text-brand-muted">{truncateUrl(item.url, 56)}</td>
+                <td className="px-4 py-3">{item.clicks}</td>
+                <td className="px-4 py-3 text-brand-muted">{formatDate(item.createdAt || item.created_at)}</td>
+                <td className="px-4 py-3">
+                  <span className={`rounded-full px-2 py-1 text-xs ${item.status === 'active' ? 'bg-brand-success/20 text-brand-success' : 'bg-brand-warning/20 text-brand-warning'}`}>
+                    {item.status}
+                  </span>
+                </td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <CopyButton value={item.shortUrl} compact />
+                    <Link to={`/analytics/${item.shortId}`} className="btn-secondary p-2"><BarChart3 size={14} /></Link>
+                    <button onClick={() => onDelete(item.shortId)} className="btn-secondary p-2 text-brand-error"><Trash2 size={14} /></button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }

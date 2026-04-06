@@ -1,92 +1,82 @@
-const API_BASE = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000').replace(/\/$/, '')
-const API_PREFIX = `${API_BASE}/api/v1`
+import axios from 'axios'
 
-async function _request(path, opts = {}) {
-  const res = await fetch(`${API_PREFIX}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) },
-    ...opts,
-  })
+const baseURL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
 
-  if (res.status === 204) return null
-  const contentType = res.headers.get('content-type') || ''
-  const payload = contentType.includes('application/json') ? await res.json() : await res.text()
-  if (!res.ok) {
-    const detail = payload && payload.detail ? payload.detail : payload
-    throw new Error(detail || 'Request failed')
-  }
-  return payload
-}
+const client = axios.create({
+  baseURL: baseURL ? `${baseURL}/api/v1` : '/api/v1',
+  timeout: 7000
+})
 
-// Mock fallback data so UI works without backend
-const MOCK_URLS = [
-  { shortId: 'x1aB2', shortUrl: 'https://short.ly/x1aB2', url: 'https://example.com/blog/fast-indexing', clicks: 1245, created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 10).toISOString(), status: 'active' },
-  { shortId: 'alpha', shortUrl: 'https://short.ly/alpha', url: 'https://vercel.com/docs', clicks: 842, created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4).toISOString(), status: 'active' },
-  { shortId: 'dev-99', shortUrl: 'https://short.ly/dev-99', url: 'https://github.com/Ananay28425/URL-Shortener', clicks: 312, created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString(), status: 'inactive' },
+const mockUrls = [
+  { shortId: 'demo-1', shortUrl: 'https://sho.rt/demo-1', url: 'https://vercel.com/blog/scaling-platforms', clicks: 1382, createdAt: '2026-03-20T08:30:00.000Z', status: 'active' },
+  { shortId: 'api-x7', shortUrl: 'https://sho.rt/api-x7', url: 'https://docs.github.com/en/rest', clicks: 792, createdAt: '2026-03-27T14:10:00.000Z', status: 'active' },
+  { shortId: 'infra99', shortUrl: 'https://sho.rt/infra99', url: 'https://kubernetes.io/docs/concepts/overview/', clicks: 344, createdAt: '2026-02-15T09:45:00.000Z', status: 'paused' }
 ]
 
-function randomTrend(days = 14) {
-  const now = Date.now()
-  return Array.from({ length: days }).map((_, i) => ({
-    date: new Date(now - (days - i - 1) * 24 * 3600 * 1000).toISOString().slice(0, 10),
-    clicks: Math.max(0, Math.round(Math.random() * 40 + (i * 3)))
-  }))
-}
+const mockTrend = [
+  { date: 'Mar 30', clicks: 52 },
+  { date: 'Mar 31', clicks: 68 },
+  { date: 'Apr 01', clicks: 74 },
+  { date: 'Apr 02', clicks: 87 },
+  { date: 'Apr 03', clicks: 102 },
+  { date: 'Apr 04', clicks: 94 },
+  { date: 'Apr 05', clicks: 119 }
+]
 
-export async function shortenUrl({ url, customAlias }) {
+export async function shortenUrl(data) {
   try {
-    const payload = await _request('/shorten', { method: 'POST', body: JSON.stringify({ url, custom_alias: customAlias || null }) })
-    return payload
-  } catch (err) {
-    // fallback mock
-    const shortId = (customAlias && customAlias.replace(/[^a-zA-Z0-9_-]/g, '')) || Math.random().toString(36).slice(2, 8)
-    const shortUrl = `${API_BASE.replace(/https?:\/\//, 'https://')} /${shortId}`.replace(/\s+/g, '')
-    return { shortId, shortUrl }
-  }
-}
-
-export async function getAllUrls() {
-  try {
-    // try expected endpoint first
-    return await _request('/urls')
-  } catch (_) {
-    try {
-      // legacy backend uses /shorten list
-      return await _request('/shorten')
-    } catch (err) {
-      // return mock
-      return MOCK_URLS
-    }
-  }
-}
-
-export async function deleteUrl(shortId) {
-  try {
-    return await _request(`/urls/${shortId}`, { method: 'DELETE' })
-  } catch (_) {
-    try {
-      return await _request(`/shorten/${shortId}`, { method: 'DELETE' })
-    } catch (err) {
-      return null
-    }
-  }
-}
-
-export async function getAnalytics(shortId) {
-  try {
-    return await _request(`/analytics/${shortId}`)
-  } catch (err) {
-    // fallback mock analytics
+    const response = await client.post('/shorten', data)
+    return response.data
+  } catch {
+    const alias = data.customAlias || Math.random().toString(36).slice(2, 8)
     return {
-      shortId,
-      url: `https://example.com/demo/${shortId}`,
-      created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 12).toISOString(),
-      total_clicks: Math.round(Math.random() * 500 + 200),
-      trend: randomTrend(20),
-      top_countries: [{ country: 'US', clicks: 412 }, { country: 'IN', clicks: 120 }, { country: 'GB', clicks: 72 }],
-      top_referrers: [{ ref: 'twitter.com', clicks: 230 }, { ref: 'reddit.com', clicks: 80 }],
-      top_devices: [{ device: 'Desktop', clicks: 540 }, { device: 'Mobile', clicks: 120 }]
+      shortId: alias,
+      shortUrl: `https://sho.rt/${alias}`,
+      url: data.url,
+      clicks: 0,
+      createdAt: new Date().toISOString(),
+      status: 'active'
     }
   }
 }
 
-export { API_BASE }
+export async function getUrls() {
+  try {
+    const response = await client.get('/urls')
+    return response.data
+  } catch {
+    return mockUrls
+  }
+}
+
+export async function getAnalytics(id) {
+  try {
+    const response = await client.get(`/analytics/${id}`)
+    return response.data
+  } catch {
+    const link = mockUrls.find((item) => item.shortId === id) || mockUrls[0]
+    const total = mockTrend.reduce((acc, point) => acc + point.clicks, 0)
+
+    return {
+      shortId: link.shortId,
+      shortUrl: link.shortUrl,
+      originalUrl: link.url,
+      createdAt: link.createdAt,
+      totalClicks: total,
+      last7Days: mockTrend.reduce((acc, point) => acc + point.clicks, 0),
+      peakDay: mockTrend.reduce((max, point) => (point.clicks > max.clicks ? point : max), mockTrend[0]),
+      avgDaily: Math.round(total / mockTrend.length),
+      trend: mockTrend,
+      topUrls: mockUrls.map((item) => ({ shortId: item.shortId, clicks: item.clicks }))
+    }
+  }
+}
+
+export async function deleteUrl(id) {
+  try {
+    await client.delete(`/urls/${id}`)
+    return { success: true }
+  } catch {
+    return { success: true }
+  }
+}
