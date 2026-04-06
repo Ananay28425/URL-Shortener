@@ -1,15 +1,21 @@
-import React from 'react'
+export default function StatsCard({ label, value, hint, icon: Icon, tone = 'default' }) {
+  const tones = {
+    default: 'from-brand-indigo/30 to-brand-purple/10',
+    success: 'from-brand-success/20 to-transparent',
+    warning: 'from-brand-warning/20 to-transparent',
+    info: 'from-brand-cyan/20 to-transparent'
+  }
 
-export default function StatsCard({ icon, label, value, trend }){
   return (
-    <div className="card p-4">
-      <div className="flex items-center justify-between">
+    <article className={`glass-card bg-gradient-to-br ${tones[tone]} p-4`}>
+      <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="text-sm text-slate-300">{label}</div>
-          <div className="mt-1 text-2xl font-bold text-white">{value}</div>
+          <p className="text-sm text-brand-muted">{label}</p>
+          <p className="mt-2 text-2xl font-bold tracking-tight">{value}</p>
+          {hint && <p className="mt-1 text-xs text-brand-slate">{hint}</p>}
         </div>
-        {trend && <div className={`text-sm ${trend.startsWith('+') ? 'text-emerald-400' : 'text-rose-400'}`}>{trend}</div>}
+        {Icon ? <Icon size={18} className="text-brand-muted" /> : null}
       </div>
-    </div>
+    </article>
   )
 }
