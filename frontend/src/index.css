@@ -14,23 +14,23 @@ body,
 
 body {
   @apply bg-brand-bg text-brand-text antialiased;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-  letter-spacing: 0.012em;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
   background-image:
-    radial-gradient(1200px 420px at 50% -20%, rgba(239, 68, 68, 0.22), transparent),
-    linear-gradient(to bottom, #030303, #070707 35%, #090909 100%);
+    radial-gradient(900px 400px at 10% -10%, rgba(99, 102, 241, 0.15), transparent),
+    radial-gradient(700px 350px at 100% 20%, rgba(6, 182, 212, 0.12), transparent),
+    linear-gradient(to bottom, #0b0f19, #0f172a 45%, #111827);
 }
 
 @layer components {
   .glass-card {
-    @apply rounded-md border border-red-500/50 bg-black/85 backdrop-blur-sm;
+    @apply rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl;
   }
 
   .input-dark {
-    @apply w-full rounded-sm border border-red-500/55 bg-black px-3 py-2 text-sm text-white placeholder:text-red-200/55 focus:border-red-400 focus:outline-none focus:ring-1 focus:ring-red-500;
+    @apply w-full rounded-xl border border-white/10 bg-brand-bgSoft/80 px-4 py-3 text-sm text-brand-text placeholder:text-brand-slate focus:border-brand-indigo focus:outline-none focus:ring-2 focus:ring-brand-indigo/40;
   }
 
   .btn-secondary {
-    @apply rounded-sm border border-red-500/60 bg-black px-3 py-1.5 text-sm font-medium text-white transition hover:bg-red-950/55;
+    @apply rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-medium text-brand-muted transition hover:bg-white/10;
   }
 }

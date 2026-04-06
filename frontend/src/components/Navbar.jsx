@@ -1,11 +1,11 @@
 import { Link, NavLink } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import { useState } from 'react'
+import GradientButton from './GradientButton'
 
 const links = [
   { to: '/', label: 'Home' },
   { to: '/dashboard', label: 'Dashboard' },
-  { to: '/analytics/demo-1', label: 'Analytics' },
   { to: '/login', label: 'Login' }
 ]
 
@@ -13,18 +13,19 @@ export default function Navbar() {
   const [open, setOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-30 border-b border-red-500/50 bg-black/95 backdrop-blur-sm">
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
-        <Link to="/" className="text-lg font-semibold uppercase tracking-[0.18em] text-white">
-          URL<span className="text-red-400"> Shortener</span>
+    <header className="sticky top-0 z-30 border-b border-white/10 bg-[#0b0f19]/75 backdrop-blur-xl">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
+        <Link to="/" className="text-sm font-semibold tracking-wide text-brand-text">
+          url<span className="text-brand-cyan">.forge</span>
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
           {links.map((item) => (
-            <NavLink key={item.to} to={item.to} className={({ isActive }) => `text-sm uppercase tracking-[0.1em] ${isActive ? 'text-red-300' : 'text-white/80 hover:text-red-200'}`}>
+            <NavLink key={item.to} to={item.to} className={({ isActive }) => `text-sm ${isActive ? 'text-white' : 'text-brand-muted hover:text-white'}`}>
               {item.label}
             </NavLink>
           ))}
+          <GradientButton className="py-2">Create URL</GradientButton>
         </nav>
 
         <button onClick={() => setOpen((v) => !v)} className="btn-secondary md:hidden" aria-label="Open menu">
@@ -33,10 +34,10 @@ export default function Navbar() {
       </div>
 
       {open && (
-        <div className="border-t border-red-500/50 bg-black px-4 py-4 md:hidden">
+        <div className="border-t border-white/10 bg-brand-bgSoft/95 px-4 py-4 md:hidden">
           <div className="flex flex-col gap-3">
             {links.map((item) => (
-              <NavLink key={item.to} to={item.to} onClick={() => setOpen(false)} className="text-sm uppercase text-white/80 hover:text-red-200">
+              <NavLink key={item.to} to={item.to} onClick={() => setOpen(false)} className="text-brand-muted hover:text-white">
                 {item.label}
               </NavLink>
             ))}
