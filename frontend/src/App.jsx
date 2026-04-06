@@ -1,30 +1,25 @@
 import React from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import Home from './pages/Home'
-import Dashboard from './pages/Dashboard'
-import Analytics from './pages/Analytics'
-import Login from './pages/Login'
-import NotFound from './pages/NotFound'
-import Navbar from './components/Navbar'
-import Footer from './components/Footer'
+import AppShell from './components/layout/AppShell'
+import HomePage from './pages/HomePage'
+import DashboardPage from './pages/DashboardPage'
+import AnalyticsPage from './pages/AnalyticsPage'
+import LoginPage from './pages/LoginPage'
+import NotFoundPage from './pages/NotFoundPage'
 import './index.css'
 
 function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen flex flex-col text-white">
-        <Navbar />
-        <main className="flex-1">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/analytics/:shortId" element={<Analytics />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </main>
-        <Footer />
-      </div>
+      <Routes>
+        <Route element={<AppShell />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/analytics/:shortId" element={<AnalyticsPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
+      </Routes>
     </BrowserRouter>
   )
 }
