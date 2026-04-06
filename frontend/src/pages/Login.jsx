@@ -1,26 +1,17 @@
-import React, { useState } from 'react'
+import GradientButton from '../components/GradientButton'
 
-export default function Login(){
-  const [email, setEmail] = useState('')
-  const [pass, setPass] = useState('')
+export default function Login() {
   return (
-    <div className="min-h-[70vh] flex items-center justify-center">
-      <div className="w-full max-w-md">
-        <div className="card p-8">
-          <h2 className="text-2xl text-white font-bold">Sign in</h2>
-          <p className="text-slate-300">Enter your credentials to continue.</p>
-          <form className="mt-6 grid gap-3">
-            <label className="text-slate-300 text-sm">Email</label>
-            <input value={email} onChange={e=>setEmail(e.target.value)} className="p-3 rounded-lg bg-black/30 border border-white/6 text-white" />
-            <label className="text-slate-300 text-sm">Password</label>
-            <input value={pass} onChange={e=>setPass(e.target.value)} type="password" className="p-3 rounded-lg bg-black/30 border border-white/6 text-white" />
-            <div className="flex items-center justify-between mt-2">
-              <label className="text-slate-300 text-sm"><input type="checkbox" className="mr-2"/> Remember me</label>
-              <a className="text-slate-300 text-sm">Forgot?</a>
-            </div>
-            <button className="mt-4 px-4 py-2 rounded-md bg-gradient-to-tr from-indigo-500 to-cyan-400 text-black font-semibold">Sign in</button>
-          </form>
-        </div>
+    <div className="relative grid min-h-screen place-items-center px-4">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.18),transparent_45%)]" />
+      <div className="glass-card relative z-10 w-full max-w-md p-8">
+        <h1 className="text-2xl font-bold">Welcome back</h1>
+        <p className="mt-2 text-sm text-brand-muted">Sign in to access your link analytics dashboard.</p>
+        <form className="mt-6 grid gap-3">
+          <input className="input-dark" type="email" placeholder="Email address" />
+          <input className="input-dark" type="password" placeholder="Password" />
+          <GradientButton type="submit" className="mt-1">Log in</GradientButton>
+        </form>
       </div>
     </div>
   )

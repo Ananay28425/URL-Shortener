@@ -1,13 +1,13 @@
-import React from 'react'
 import { Link } from 'react-router-dom'
 
-export default function NotFound(){
+export default function NotFound() {
   return (
-    <div className="min-h-[70vh] flex items-center justify-center">
-      <div className="card p-8 text-center">
-        <h1 className="text-4xl font-bold text-white">404</h1>
-        <p className="mt-2 text-slate-300">We couldn't find that page.</p>
-        <div className="mt-4"><Link to="/" className="px-4 py-2 rounded-md bg-white/6">Go home</Link></div>
+    <div className="mx-auto grid min-h-[70vh] max-w-xl place-items-center px-4 py-20 text-center">
+      <div className="glass-card w-full p-10">
+        <p className="text-xs uppercase tracking-[0.25em] text-brand-slate">404</p>
+        <h1 className="mt-2 text-3xl font-bold">Page not found</h1>
+        <p className="mt-3 text-sm text-brand-muted">The page you requested does not exist or has moved.</p>
+        <Link to="/" className="btn-secondary mt-5 inline-block">Back to Home</Link>
       </div>
     </div>
   )

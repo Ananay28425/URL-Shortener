@@ -1,27 +1,24 @@
-import React from 'react'
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts'
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 
-export default function AnalyticsChart({ data = [] }){
+export default function AnalyticsChart({ data }) {
   return (
-    <div className="card p-4">
-      <div className="text-slate-300 text-sm">Clicks (Last {data.length} days)</div>
-      <div style={{width:'100%', height:260}} className="mt-4">
-        <ResponsiveContainer>
-          <AreaChart data={data}>
-            <defs>
-              <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.6} />
-                <stop offset="100%" stopColor="#06b6d4" stopOpacity={0.06} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid stroke="rgba(255,255,255,0.03)" />
-            <XAxis dataKey="date" tick={{fill:'rgba(255,255,255,0.6)'}}/>
-            <YAxis tick={{fill:'rgba(255,255,255,0.6)'}} />
-            <Tooltip contentStyle={{background:'#0b0f19', border:'1px solid rgba(255,255,255,0.06)'}} itemStyle={{color:'#fff'}}/>
-            <Area type="monotone" dataKey="clicks" stroke="#8b5cf6" fill="url(#g1)" strokeWidth={2} />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
+    <div className="glass-card h-[340px] p-4">
+      <h3 className="mb-4 text-sm font-medium text-brand-muted">Click trend</h3>
+      <ResponsiveContainer width="100%" height="90%">
+        <AreaChart data={data}>
+          <defs>
+            <linearGradient id="clickGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#6366F1" stopOpacity={0.6} />
+              <stop offset="95%" stopColor="#6366F1" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid stroke="rgba(148,163,184,0.15)" strokeDasharray="3 3" />
+          <XAxis dataKey="date" stroke="#94A3B8" fontSize={12} />
+          <YAxis stroke="#94A3B8" fontSize={12} />
+          <Tooltip contentStyle={{ background: '#0F172A', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12 }} />
+          <Area type="monotone" dataKey="clicks" stroke="#06B6D4" fill="url(#clickGradient)" strokeWidth={2.5} />
+        </AreaChart>
+      </ResponsiveContainer>
     </div>
   )
 }

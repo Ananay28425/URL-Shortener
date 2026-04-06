@@ -1,8 +1,4 @@
-export default function formatDate(iso) {
-  try {
-    const d = new Date(iso)
-    return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
-  } catch (e) {
-    return iso
-  }
+export default function formatDate(value) {
+  if (!value) return '—'
+  return new Date(value).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })
 }

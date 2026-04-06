@@ -1,7 +1,8 @@
-import React from 'react'
-
-export default function LoadingSpinner({ size = 28 }){
+export default function LoadingSpinner({ label = 'Loading...' }) {
   return (
-    <div style={{width:size, height:size}} className="rounded-full border-2 border-t-transparent border-white/30 animate-spin"></div>
+    <div className="flex items-center gap-3 text-sm text-brand-muted">
+      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-brand-cyan" />
+      <span>{label}</span>
+    </div>
   )
 }

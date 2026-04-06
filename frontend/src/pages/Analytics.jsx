@@ -1,82 +1,58 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { getAnalytics } from '../services/api'
 import AnalyticsChart from '../components/AnalyticsChart'
+import CopyButton from '../components/CopyButton'
+import LoadingSpinner from '../components/LoadingSpinner'
+import StatsCard from '../components/StatsCard'
 import TopUrlsChart from '../components/TopUrlsChart'
-import { ChartSkeleton } from '../components/Skeletons'
+import { getAnalytics } from '../services/api'
 import formatDate from '../utils/formatDate'
 
-export default function Analytics(){
-  const { shortId } = useParams()
+export default function Analytics() {
+  const { id } = useParams()
   const [data, setData] = useState(null)
-  const [loading, setLoading] = useState(true)
 
-  useEffect(()=>{
-    let mounted = true
-    async function load(){
-      setLoading(true)
-      try{
-        const res = await getAnalytics(shortId)
-        if(mounted) setData(res)
-      }catch(err){ console.error(err) }
-      setLoading(false)
-    }
-    load()
-    return ()=> mounted = false
-  },[shortId])
+  useEffect(() => {
+    getAnalytics(id).then(setData)
+  }, [id])
 
-  if(loading) return (
-    <div className="pt-6">
-      <div className="max-w-7xl mx-auto px-4 grid gap-6">
-        <div className="grid lg:grid-cols-3 gap-4">
-          <div className="lg:col-span-2">
-            <ChartSkeleton />
-          </div>
-          <div className="space-y-4">
-            <div className="card p-4 animate-pulse"><div className="h-4 bg-white/6 w-1/3 mb-3"></div><div className="h-12 bg-white/6 rounded"/></div>
-            <div className="card p-4 animate-pulse"><div className="h-4 bg-white/6 w-1/3 mb-3"></div><div className="h-24 bg-white/6 rounded"/></div>
-          </div>
-        </div>
-        <div className="card p-4 animate-pulse"><div className="h-4 bg-white/6 w-1/3 mb-3"></div><div className="h-40 bg-white/6 rounded"/></div>
-      </div>
-    </div>
-  )
-
-  if(!data) return <div className="p-8 card">No analytics found.</div>
+  if (!data) {
+    return <div className="mx-auto max-w-7xl px-4 py-8"><LoadingSpinner label="Loading analytics" /></div>
+  }
 
   return (
-    <div className="pt-6">
-      <div className="max-w-7xl mx-auto px-4 grid gap-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-slate-300">Short URL</div>
-            <div className="text-white font-mono text-lg">{data.shortId ? `${window.location.origin}/${data.shortId}` : data.url}</div>
-            <div className="text-slate-400">Created {formatDate(data.created_at)} • {data.total_clicks} total clicks</div>
-          </div>
+    <div className="mx-auto max-w-7xl px-4 py-8">
+      <header className="glass-card mb-5 p-5">
+        <p className="text-xs uppercase tracking-[0.2em] text-brand-slate">Analytics Detail</p>
+        <h1 className="mt-2 text-xl font-semibold">{data.shortUrl}</h1>
+        <p className="mt-1 text-sm text-brand-muted">{data.originalUrl}</p>
+        <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-brand-slate">
+          <span>Created {formatDate(data.createdAt)}</span>
+          <span>•</span>
+          <span>{data.totalClicks} total clicks</span>
+          <CopyButton value={data.shortUrl} compact />
         </div>
+      </header>
 
-        <div className="grid lg:grid-cols-3 gap-4">
-          <div className="lg:col-span-2">
-            <AnalyticsChart data={data.trend || []} />
-          </div>
-          <div className="space-y-4">
-            <div className="card p-4">
-              <div className="text-slate-300 text-sm">Total Clicks</div>
-              <div className="text-2xl text-white font-bold">{data.total_clicks}</div>
-            </div>
-            <div className="card p-4">
-              <div className="text-slate-300 text-sm">Top Countries</div>
-              <ul className="mt-2 text-white">
-                {(data.top_countries||[]).map(c=> <li key={c.country} className="flex justify-between"><span>{c.country}</span><span className="text-slate-300">{c.clicks}</span></li>)}
-              </ul>
-            </div>
-          </div>
-        </div>
+      <section className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <StatsCard label="Total Clicks" value={data.totalClicks} />
+        <StatsCard label="Last 7 Days" value={data.last7Days} tone="info" />
+        <StatsCard label="Peak Day" value={`${data.peakDay.date} (${data.peakDay.clicks})`} tone="warning" />
+        <StatsCard label="Avg Daily Clicks" value={data.avgDaily} tone="success" />
+      </section>
 
-        <div>
-          <TopUrlsChart data={(data.top_referrers||[]).map((r, idx)=> ({ shortId: r.ref, clicks: r.clicks }))} />
-        </div>
-      </div>
+      <section className="grid gap-5 xl:grid-cols-5">
+        <div className="xl:col-span-3"><AnalyticsChart data={data.trend} /></div>
+        <div className="xl:col-span-2"><TopUrlsChart data={data.topUrls} /></div>
+      </section>
+
+      <section className="glass-card mt-5 p-5">
+        <h3 className="text-sm font-medium text-brand-muted">Analytics summary</h3>
+        <p className="mt-2 text-sm leading-7 text-brand-muted">
+          This link shows steady growth with a strong recent click trend. Performance spikes indicate campaign bursts,
+          while average daily engagement remains healthy for ongoing distribution.
+        </p>
+      </section>
     </div>
   )
 }
