@@ -15,13 +15,13 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-30 border-b border-red-500/50 bg-black/95 backdrop-blur-sm">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
-        <Link to="/" className="text-lg font-semibold uppercase tracking-widest text-white">
+        <Link to="/" className="text-lg font-semibold uppercase tracking-[0.18em] text-white">
           URL<span className="text-red-400"> Shortener</span>
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
           {links.map((item) => (
-            <NavLink key={item.to} to={item.to} className={({ isActive }) => `text-sm uppercase tracking-wide ${isActive ? 'text-red-300' : 'text-white/80 hover:text-red-200'}`}>
+            <NavLink key={item.to} to={item.to} className={({ isActive }) => `text-sm uppercase tracking-[0.1em] ${isActive ? 'text-red-300' : 'text-white/80 hover:text-red-200'}`}>
               {item.label}
             </NavLink>
           ))}

@@ -15,7 +15,7 @@ body,
 body {
   @apply bg-brand-bg text-brand-text antialiased;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.012em;
   background-image:
     radial-gradient(1200px 420px at 50% -20%, rgba(239, 68, 68, 0.22), transparent),
     linear-gradient(to bottom, #030303, #070707 35%, #090909 100%);
@@ -23,7 +23,7 @@ body {
 
 @layer components {
   .glass-card {
-    @apply rounded-md border border-red-500/45 bg-black/80 backdrop-blur-sm;
+    @apply rounded-md border border-red-500/50 bg-black/85 backdrop-blur-sm;
   }
 
   .input-dark {

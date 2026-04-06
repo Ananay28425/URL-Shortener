@@ -10,7 +10,7 @@ export default function StatsCard({ label, value, hint, icon: Icon, tone = 'defa
     <article className={`glass-card p-4 ${tones[tone]}`}>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs uppercase tracking-wide text-white/70">{label}</p>
+          <p className="text-xs uppercase tracking-[0.08em] text-white/70">{label}</p>
           <p className="mt-2 text-2xl font-bold tracking-tight text-white">{value}</p>
           {hint && <p className="mt-1 text-xs text-white/60">{hint}</p>}
         </div>

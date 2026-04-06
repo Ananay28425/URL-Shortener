@@ -3,7 +3,7 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 export default function TopUrlsChart({ data }) {
   return (
     <div className="glass-card h-[340px] p-4">
-      <h3 className="mb-4 text-sm uppercase tracking-widest text-red-300">Performance breakdown</h3>
+      <h3 className="mb-4 text-sm uppercase tracking-[0.12em] text-red-300">Performance breakdown</h3>
       <ResponsiveContainer width="100%" height="90%">
         <BarChart data={data}>
           <CartesianGrid stroke="rgba(239,68,68,0.25)" strokeDasharray="3 3" />

@@ -6,14 +6,14 @@ export default function HeroSection() {
   return (
     <section className="relative overflow-hidden px-4 pb-10 pt-12">
       <div className="mx-auto max-w-5xl text-left">
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-4 text-xs uppercase tracking-[0.3em] text-red-300">
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-4 text-xs uppercase tracking-[0.28em] text-red-300">
           {`> scalable • analytics • terminal mode`}
         </motion.p>
         <motion.h1
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45 }}
-          className="text-4xl font-bold tracking-tight text-white sm:text-5xl"
+          className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl"
         >
           Shorten Links. Track Everything.
         </motion.h1>

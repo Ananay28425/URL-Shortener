@@ -3,7 +3,7 @@ import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YA
 export default function AnalyticsChart({ data }) {
   return (
     <div className="glass-card h-[340px] p-4">
-      <h3 className="mb-4 text-sm uppercase tracking-widest text-red-300">Click trend</h3>
+      <h3 className="mb-4 text-sm uppercase tracking-[0.12em] text-red-300">Click trend</h3>
       <ResponsiveContainer width="100%" height="90%">
         <AreaChart data={data}>
           <defs>
