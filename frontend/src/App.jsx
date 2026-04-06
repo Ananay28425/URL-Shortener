@@ -1,344 +1,166 @@
-import { useEffect, useMemo, useState } from 'react';
-import {
-  API_BASE_URL,
-  createShortUrl,
-  deleteShortUrl,
-  getAnalytics,
-  listShortUrls,
-} from './api';
+const API_BASE_URL = 'http://localhost:8000/api/v1';
 
-const initialForm = {
-  url: '',
-  customAlias: '',
-  expiresInDays: '',
-};
+// Event listeners
+document.getElementById('shortenForm').addEventListener('submit', handleShortenURL);
 
-function formatDate(value) {
-  if (!value) {
-    return '—';
-  }
+// Load URLs on page load
+document.addEventListener('DOMContentLoaded', loadAllUrls);
 
-  return new Date(value).toLocaleString();
+async function handleShortenURL(e) {
+    e.preventDefault();
+    
+    const urlInput = document.getElementById('urlInput');
+    const aliasInput = document.getElementById('aliasInput');
+    const successMsg = document.getElementById('successMessage');
+    const errorMsg = document.getElementById('errorMessage');
+    
+    successMsg.style.display = 'none';
+    errorMsg.style.display = 'none';
+    
+    try {
+        const requestBody = {
+            url: urlInput.value
+        };
+        
+        if (aliasInput.value.trim()) {
+            requestBody.custom_alias = aliasInput.value.trim();
+        }
+        
+        const response = await fetch(`${API_BASE_URL}/shorten`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestBody)
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || 'Failed to shorten URL');
+        }
+        
+        const data = await response.json();
+        
+        // Display result
+        document.getElementById('shortUrlOutput').value = data.short_url;
+        document.getElementById('originalUrlOutput').textContent = data.original_url;
+        document.getElementById('createdAtOutput').textContent = new Date(data.created_at).toLocaleString();
+        document.getElementById('resultSection').style.display = 'block';
+        
+        successMsg.textContent = `✓ URL shortened successfully!`;
+        successMsg.style.display = 'block';
+        
+        // Clear form
+        urlInput.value = '';
+        aliasInput.value = '';
+        
+        // Reload URLs list
+        setTimeout(loadAllUrls, 500);
+        
+    } catch (error) {
+        console.error('Error:', error);
+        errorMsg.textContent = `✗ ${error.message}`;
+        errorMsg.style.display = 'block';
+    }
 }
 
-function StatList({ title, items }) {
-  const entries = Object.entries(items || {});
-
-  return (
-    <div className="stat-card">
-      <h4>{title}</h4>
-      {entries.length === 0 ? (
-        <p className="muted">No data yet.</p>
-      ) : (
-        <ul>
-          {entries.map(([key, count]) => (
-            <li key={key}>
-              <span>{key}</span>
-              <strong>{count}</strong>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
-export default function App() {
-  const [items, setItems] = useState([]);
-  const [form, setForm] = useState(initialForm);
-  const [selectedCode, setSelectedCode] = useState('');
-  const [analytics, setAnalytics] = useState(null);
-  const [loadingList, setLoadingList] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [loadingAnalytics, setLoadingAnalytics] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-
-  const activeItems = useMemo(() => items.filter((item) => item.is_active), [items]);
-
-  async function refreshList(nextSelectedCode) {
-    setLoadingList(true);
+async function loadAllUrls() {
+    const urlsList = document.getElementById('urlsList');
+    
     try {
-      const data = await listShortUrls();
-      setItems(data);
-
-      if (nextSelectedCode) {
-        setSelectedCode(nextSelectedCode);
-      } else if (data.length > 0 && !data.some((item) => item.short_code === selectedCode)) {
-        setSelectedCode(data[0].short_code);
-      } else if (data.length === 0) {
-        setSelectedCode('');
-        setAnalytics(null);
-      }
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoadingList(false);
-    }
-  }
-
-  useEffect(() => {
-    refreshList();
-  }, []);
-
-  useEffect(() => {
-    if (!selectedCode) {
-      setAnalytics(null);
-      return;
-    }
-
-    async function loadAnalytics() {
-      setLoadingAnalytics(true);
-      setError('');
-      try {
-        const data = await getAnalytics(selectedCode);
-        setAnalytics(data);
-      } catch (err) {
-        setAnalytics(null);
-        setError(err.message);
-      } finally {
-        setLoadingAnalytics(false);
-      }
-    }
-
-    loadAnalytics();
-  }, [selectedCode]);
-
-  async function handleSubmit(event) {
-    event.preventDefault();
-    setSubmitting(true);
-    setError('');
-    setSuccess('');
-
-    try {
-      const created = await createShortUrl(form);
-      setForm(initialForm);
-      setSuccess(`Created short URL ${created.short_url}`);
-      await refreshList(created.short_code);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  async function handleDelete(shortCode) {
-    setError('');
-    setSuccess('');
-
-    try {
-      await deleteShortUrl(shortCode);
-      setSuccess(`Deleted short code ${shortCode}`);
-      const nextCode = selectedCode === shortCode ? '' : selectedCode;
-      await refreshList(nextCode);
-    } catch (err) {
-      setError(err.message);
-    }
-  }
-
-  return (
-    <div className="page-shell">
-      <header className="hero">
-        <div>
-          <p className="eyebrow">Frontend dashboard</p>
-          <h1>URL Shortener</h1>
-          <p className="muted">Create, browse, delete, and inspect analytics for the FastAPI backend.</p>
-        </div>
-        <div className="backend-chip">Backend: {API_BASE_URL}</div>
-      </header>
-
-      {error ? <div className="banner error">{error}</div> : null}
-      {success ? <div className="banner success">{success}</div> : null}
-
-      <main className="layout">
-        <section className="card">
-          <h2>Create short URL</h2>
-          <form className="form-grid" onSubmit={handleSubmit}>
-            <label>
-              Original URL
-              <input
-                required
-                type="url"
-                placeholder="https://example.com/article"
-                value={form.url}
-                onChange={(event) => setForm((current) => ({ ...current, url: event.target.value }))}
-              />
-            </label>
-            <label>
-              Custom alias
-              <input
-                type="text"
-                placeholder="optional-alias"
-                value={form.customAlias}
-                onChange={(event) => setForm((current) => ({ ...current, customAlias: event.target.value }))}
-              />
-            </label>
-            <label>
-              Expires in days
-              <input
-                type="number"
-                min="1"
-                max="3650"
-                placeholder="optional"
-                value={form.expiresInDays}
-                onChange={(event) => setForm((current) => ({ ...current, expiresInDays: event.target.value }))}
-              />
-            </label>
-            <button type="submit" disabled={submitting}>
-              {submitting ? 'Creating…' : 'Create short URL'}
-            </button>
-          </form>
-        </section>
-
-        <section className="card">
-          <div className="section-header">
-            <h2>Short URLs</h2>
-            <button type="button" className="secondary" onClick={() => refreshList()} disabled={loadingList}>
-              {loadingList ? 'Refreshing…' : 'Refresh'}
-            </button>
-          </div>
-
-          {loadingList ? (
-            <p className="muted">Loading URLs…</p>
-          ) : items.length === 0 ? (
-            <p className="muted">No short URLs created yet.</p>
-          ) : (
-            <div className="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Code</th>
-                    <th>Original URL</th>
-                    <th>Clicks</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {items.map((item) => (
-                    <tr key={item.short_code} className={selectedCode === item.short_code ? 'selected-row' : ''}>
-                      <td>
-                        <button
-                          type="button"
-                          className="link-button"
-                          onClick={() => setSelectedCode(item.short_code)}
-                        >
-                          {item.short_code}
-                        </button>
-                      </td>
-                      <td>
-                        <a href={item.original_url} target="_blank" rel="noreferrer">
-                          {item.original_url}
-                        </a>
-                      </td>
-                      <td>{item.click_count}</td>
-                      <td>{item.is_active ? 'Active' : 'Inactive'}</td>
-                      <td>
-                        <div className="action-row">
-                          <button type="button" className="secondary" onClick={() => setSelectedCode(item.short_code)}>
-                            Analytics
-                          </button>
-                          <button
-                            type="button"
-                            className="danger"
-                            onClick={() => handleDelete(item.short_code)}
-                            disabled={!item.is_active}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        const response = await fetch(`${API_BASE_URL}/shorten`);
+        
+        if (!response.ok) {
+            throw new Error('Failed to load URLs');
+        }
+        
+        const urls = await response.json();
+        
+        if (!urls || urls.length === 0) {
+            urlsList.innerHTML = '<div class="empty-state"><p>No shortened URLs yet. Create one to get started!</p></div>';
+            return;
+        }
+        
+        urlsList.innerHTML = urls.map(url => `
+            <div class="url-item">
+                <div class="url-item-info">
+                    <div class="url-item-short">
+                        <a href="${url.short_url}" target="_blank">${url.short_url}</a>
+                    </div>
+                    <div class="url-item-original">
+                        ${url.original_url}
+                    </div>
+                    <div class="url-item-stats">
+                        Created: ${new Date(url.created_at).toLocaleDateString()} | 
+                        Clicks: ${url.click_count || 0}
+                    </div>
+                </div>
+                <div class="url-actions">
+                    <button class="btn-view-analytics" onclick="viewAnalytics('${url.short_code}')">Analytics</button>
+                    <button class="btn-delete" onclick="deleteURL('${url.short_code}')">Delete</button>
+                </div>
             </div>
-          )}
+        `).join('');
+        
+    } catch (error) {
+        console.error('Error loading URLs:', error);
+        urlsList.innerHTML = '<div class="empty-state"><p>Error loading URLs. Please try again.</p></div>';
+    }
+}
 
-          <p className="muted compact">Active links: {activeItems.length} / {items.length}</p>
-        </section>
+async function viewAnalytics(shortCode) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/analytics/${shortCode}`);
+        
+        if (!response.ok) {
+            throw new Error('Failed to load analytics');
+        }
+        
+        const analytics = await response.json();
+        
+        // Create analytics display
+        const analyticsText = `
+Analytics for ${shortCode}:
+- Total Clicks: ${analytics.total_clicks}
+- Last Clicked: ${analytics.last_clicked_at ? new Date(analytics.last_clicked_at).toLocaleString() : 'Never'}
+- Top Referrers: ${JSON.stringify(analytics.top_referrers)}
+- Browsers: ${JSON.stringify(analytics.browser_breakdown)}
+- Devices: ${JSON.stringify(analytics.device_breakdown)}
+`;
+        
+        alert(analyticsText);
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to load analytics. ' + error.message);
+    }
+}
 
-        <section className="card analytics-card">
-          <div className="section-header">
-            <h2>Analytics</h2>
-            <select value={selectedCode} onChange={(event) => setSelectedCode(event.target.value)} disabled={items.length === 0}>
-              {items.length === 0 ? <option value="">No short URLs</option> : null}
-              {items.map((item) => (
-                <option key={item.short_code} value={item.short_code}>
-                  {item.short_code}
-                </option>
-              ))}
-            </select>
-          </div>
+async function deleteURL(shortCode) {
+    if (!confirm(`Are you sure you want to delete the short URL: ${shortCode}?`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/shorten/${shortCode}`, {
+            method: 'DELETE'
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to delete URL');
+        }
+        
+        alert(`URL ${shortCode} deleted successfully`);
+        loadAllUrls();
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to delete URL. ' + error.message);
+    }
+}
 
-          {!selectedCode ? (
-            <p className="muted">Select a short code to view analytics.</p>
-          ) : loadingAnalytics ? (
-            <p className="muted">Loading analytics…</p>
-          ) : analytics ? (
-            <>
-              <div className="analytics-overview">
-                <div>
-                  <span className="label">Short URL</span>
-                  <a href={analytics.short_url} target="_blank" rel="noreferrer">{analytics.short_url}</a>
-                </div>
-                <div>
-                  <span className="label">Original URL</span>
-                  <span>{analytics.original_url}</span>
-                </div>
-                <div>
-                  <span className="label">Total clicks</span>
-                  <strong>{analytics.total_clicks}</strong>
-                </div>
-                <div>
-                  <span className="label">Last click</span>
-                  <span>{formatDate(analytics.last_clicked_at)}</span>
-                </div>
-              </div>
-
-              <div className="stats-grid">
-                <StatList title="Top referrers" items={analytics.top_referrers} />
-                <StatList title="Browsers" items={analytics.browser_breakdown} />
-                <StatList title="Devices" items={analytics.device_breakdown} />
-              </div>
-
-              <div>
-                <h3>Recent clicks</h3>
-                {analytics.recent_clicks.length === 0 ? (
-                  <p className="muted">No click events recorded yet.</p>
-                ) : (
-                  <div className="table-wrap">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Timestamp</th>
-                          <th>IP</th>
-                          <th>Referer</th>
-                          <th>Browser</th>
-                          <th>Device</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {analytics.recent_clicks.map((click, index) => (
-                          <tr key={`${click.timestamp}-${index}`}>
-                            <td>{formatDate(click.timestamp)}</td>
-                            <td>{click.ip_address || '—'}</td>
-                            <td>{click.referer || 'direct'}</td>
-                            <td>{click.browser || 'unknown'}</td>
-                            <td>{click.device_type || 'unknown'}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            </>
-          ) : (
-            <p className="muted">Analytics unavailable for this short code.</p>
-          )}
-        </section>
-      </main>
-    </div>
-  );
+function copyToClipboard() {
+    const shortUrlOutput = document.getElementById('shortUrlOutput');
+    shortUrlOutput.select();
+    document.execCommand('copy');
+    alert('URL copied to clipboard!');
 }

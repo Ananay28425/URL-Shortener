@@ -1,12 +1,65 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>URL Shortener</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔗 URL Shortener</h1>
+            <p>Create short, memorable links</p>
+        </header>
+
+        <main>
+            <!-- Create Short URL Section -->
+            <section class="card">
+                <h2>Create Short URL</h2>
+                <form id="shortenForm">
+                    <div class="form-group">
+                        <label for="urlInput">Enter URL:</label>
+                        <input type="url" id="urlInput" placeholder="https://example.com/very/long/url" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="aliasInput">Custom Alias (optional):</label>
+                        <input type="text" id="aliasInput" placeholder="my-link">
+                    </div>
+                    <button type="submit" class="btn-primary">Shorten URL</button>
+                </form>
+                <div id="successMessage" class="message success" style="display: none;"></div>
+                <div id="errorMessage" class="message error" style="display: none;"></div>
+            </section>
+
+            <!-- Result Section -->
+            <section class="card" id="resultSection" style="display: none;">
+                <h2>Your Shortened URL</h2>
+                <div class="result">
+                    <p><strong>Short URL:</strong></p>
+                    <div class="url-box">
+                        <input type="text" id="shortUrlOutput" readonly>
+                        <button type="button" class="btn-copy" onclick="copyToClipboard()">Copy</button>
+                    </div>
+                    <p><strong>Original URL:</strong></p>
+                    <p id="originalUrlOutput" style="word-break: break-all; color: #666;"></p>
+                    <p><strong>Created:</strong> <span id="createdAtOutput"></span></p>
+                </div>
+            </section>
+
+            <!-- URLs List Section -->
+            <section class="card">
+                <h2>All Shortened URLs</h2>
+                <button type="button" class="btn-secondary" onclick="loadAllUrls()">Refresh List</button>
+                <div id="urlsList" class="urls-list"></div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 URL Shortener. Backend API: <a href="http://localhost:8000/docs" target="_blank">API Docs</a></p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
 </html>
