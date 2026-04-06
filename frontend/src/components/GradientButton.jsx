@@ -10,10 +10,10 @@ export default function GradientButton({
   return (
     <motion.button
       type={type}
-      whileTap={{ scale: 0.98 }}
-      whileHover={{ y: -1 }}
+      whileTap={{ scale: 0.97 }}
+      whileHover={{ y: -2 }}
       disabled={disabled}
-      className={`rounded-xl bg-gradient-to-r from-brand-indigo via-brand-purple to-brand-cyan px-5 py-2.5 text-sm font-semibold text-white shadow-glow transition disabled:cursor-not-allowed disabled:opacity-60 ${className}`}
+      className={`rounded-xl bg-gradient-to-r from-brand-indigo via-brand-purple to-brand-cyan px-6 py-3 font-semibold text-white shadow-glow transition-all disabled:cursor-not-allowed disabled:opacity-60 ${className}`}
       {...props}
     >
       {children}
