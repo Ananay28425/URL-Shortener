@@ -2,19 +2,26 @@ import { BarChart3, ShieldCheck, Zap, Sparkles, TrendingUp, Lock } from 'lucide-
 import { useState } from 'react'
 import FeatureCard from '../components/FeatureCard'
 import HeroSection from '../components/HeroSection'
-import StatsCard from '../components/StatsCard'
 import UrlForm from '../components/UrlForm'
-import { shortenUrl } from '../services/api'
+import { api } from '../services/api'
 
 export default function Home() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
+  const [error, setError] = useState('')
 
   async function handleShorten(payload) {
     setLoading(true)
-    const created = await shortenUrl(payload)
-    setResult(created)
-    setLoading(false)
+    setError('')
+    try {
+      const created = await api.shorten(payload.url, payload.customAlias)
+      setResult(created)
+    } catch (err) {
+      setResult(null)
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -28,7 +35,7 @@ export default function Home() {
           </div>
           <h2 className="text-3xl font-bold text-brand-text">Create Your First Link</h2>
           <p className="mt-3 text-brand-muted">Enter a URL and get a shareable link instantly. No signup required.</p>
-          <UrlForm onSubmit={handleShorten} loading={loading} result={result} />
+          <UrlForm onSubmit={handleShorten} loading={loading} result={result} error={error} />
         </div>
       </section>
 
@@ -40,34 +47,34 @@ export default function Home() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <FeatureCard 
-            icon={Zap} 
-            title="Lightning Fast" 
+          <FeatureCard
+            icon={Zap}
+            title="Lightning Fast"
             description="Redirect in milliseconds with our globally distributed edge network. Optimized for speed."
           />
-          <FeatureCard 
-            icon={BarChart3} 
-            title="Real-time Analytics" 
+          <FeatureCard
+            icon={BarChart3}
+            title="Real-time Analytics"
             description="Track clicks, geographic distribution, and trends with rich dashboards and insights."
           />
-          <FeatureCard 
-            icon={ShieldCheck} 
-            title="Enterprise Security" 
+          <FeatureCard
+            icon={ShieldCheck}
+            title="Enterprise Security"
             description="Built-in security with HTTPS, rate limiting, and audit logs for compliance."
           />
-          <FeatureCard 
-            icon={Sparkles} 
-            title="Easy Integration" 
+          <FeatureCard
+            icon={Sparkles}
+            title="Easy Integration"
             description="REST API for seamless integration into your applications and workflows."
           />
-          <FeatureCard 
-            icon={TrendingUp} 
-            title="Campaign Tracking" 
+          <FeatureCard
+            icon={TrendingUp}
+            title="Campaign Tracking"
             description="Tag links and monitor performance across different campaigns and channels."
           />
-          <FeatureCard 
-            icon={Lock} 
-            title="Private & Reliable" 
+          <FeatureCard
+            icon={Lock}
+            title="Private & Reliable"
             description="Your data stays secure. Self-hosted or cloud options for complete control."
           />
         </div>

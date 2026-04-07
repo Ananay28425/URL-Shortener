@@ -21,7 +21,7 @@ export default function UrlTable({ items, onDelete }) {
           </thead>
           <tbody>
             {items.map((item) => (
-              <tr key={item.id || item.shortId} className="border-b border-white/5">
+              <tr key={item.shortCode || item.shortId} className="border-b border-white/5">
                 <td className="px-4 py-3 font-mono text-xs sm:text-sm">{item.shortUrl}</td>
                 <td className="px-4 py-3 text-brand-muted">{truncateUrl(item.url, 56)}</td>
                 <td className="px-4 py-3">{item.clicks}</td>
@@ -34,8 +34,8 @@ export default function UrlTable({ items, onDelete }) {
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
                     <CopyButton value={item.shortUrl} compact />
-                    <Link to={`/analytics/${item.shortId}`} className="btn-secondary p-2"><BarChart3 size={14} /></Link>
-                    <button onClick={() => onDelete(item.shortId)} className="btn-secondary p-2 text-brand-error"><Trash2 size={14} /></button>
+                    <Link to={`/analytics/${item.shortCode || item.shortId}`} className="btn-secondary p-2"><BarChart3 size={14} /></Link>
+                    <button onClick={() => onDelete(item.shortCode || item.shortId)} className="btn-secondary p-2 text-brand-error"><Trash2 size={14} /></button>
                   </div>
                 </td>
               </tr>

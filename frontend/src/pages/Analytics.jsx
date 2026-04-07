@@ -5,16 +5,32 @@ import CopyButton from '../components/CopyButton'
 import LoadingSpinner from '../components/LoadingSpinner'
 import StatsCard from '../components/StatsCard'
 import TopUrlsChart from '../components/TopUrlsChart'
-import { getAnalytics } from '../services/api'
-import formatDate from '../utils/formatDate'
+import { api } from '../services/api'
 
 export default function Analytics() {
-  const { id } = useParams()
+  const { shortCode } = useParams()
   const [data, setData] = useState(null)
+  const [error, setError] = useState('')
+  const [insight, setInsight] = useState('')
 
   useEffect(() => {
-    getAnalytics(id).then(setData)
-  }, [id])
+    setError('')
+    setData(null)
+    api.getAnalytics(shortCode).then(setData).catch((err) => setError(err.message))
+  }, [shortCode])
+
+  async function runDiagnostic() {
+    setInsight('')
+    try {
+      await api.getAiInsight(data)
+    } catch (err) {
+      setInsight(err.message)
+    }
+  }
+
+  if (error) {
+    return <div className="mx-auto max-w-7xl px-4 py-8 text-brand-error">{error}</div>
+  }
 
   if (!data) {
     return <div className="mx-auto max-w-7xl px-4 py-8"><LoadingSpinner label="Loading analytics" /></div>
@@ -27,11 +43,11 @@ export default function Analytics() {
         <h1 className="mt-2 text-xl font-semibold">{data.shortUrl}</h1>
         <p className="mt-1 text-sm text-brand-muted">{data.originalUrl}</p>
         <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-brand-slate">
-          <span>Created {formatDate(data.createdAt)}</span>
-          <span>•</span>
           <span>{data.totalClicks} total clicks</span>
           <CopyButton value={data.shortUrl} compact />
+          <button onClick={runDiagnostic} className="btn-secondary px-3 py-1">Run Diagnostic</button>
         </div>
+        {insight && <p className="mt-2 text-sm text-brand-warning">{insight}</p>}
       </header>
 
       <section className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -46,12 +62,34 @@ export default function Analytics() {
         <div className="xl:col-span-2"><TopUrlsChart data={data.topUrls} /></div>
       </section>
 
+      <section className="mt-5 grid gap-5 xl:grid-cols-2">
+        <div className="glass-card p-5">
+          <h3 className="text-sm font-medium text-brand-muted">Browser breakdown</h3>
+          <TopUrlsChart data={data.browsers} />
+        </div>
+        <div className="glass-card p-5">
+          <h3 className="text-sm font-medium text-brand-muted">Device breakdown</h3>
+          <TopUrlsChart data={data.devices} />
+        </div>
+      </section>
+
       <section className="glass-card mt-5 p-5">
-        <h3 className="text-sm font-medium text-brand-muted">Analytics summary</h3>
-        <p className="mt-2 text-sm leading-7 text-brand-muted">
-          This link shows steady growth with a strong recent click trend. Performance spikes indicate campaign bursts,
-          while average daily engagement remains healthy for ongoing distribution.
-        </p>
+        <h3 className="text-sm font-medium text-brand-muted">Recent click events</h3>
+        {data.recentClicks.length === 0 ? (
+          <p className="mt-2 text-sm text-brand-muted">No click events recorded yet.</p>
+        ) : (
+          <div className="mt-3 space-y-2 text-sm">
+            {data.recentClicks.slice(0, 5).map((click) => (
+              <div key={`${click.timestamp}-${click.ip_address || 'na'}`} className="rounded-lg bg-white/5 px-3 py-2">
+                <span>{new Date(click.timestamp).toLocaleString()}</span>
+                <span className="mx-2">•</span>
+                <span>{click.referer || 'direct'}</span>
+                <span className="mx-2">•</span>
+                <span>{click.browser || 'unknown'} / {click.device_type || 'unknown'}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   )
