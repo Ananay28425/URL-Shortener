@@ -9,13 +9,21 @@ export default function CreateUrlModal({ open, onClose, onCreate }) {
   const [alias, setAlias] = useState('')
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   async function submit(e) {
     e.preventDefault()
     setLoading(true)
-    const created = await onCreate({ url, customAlias: alias || undefined })
-    setResult(created)
-    setLoading(false)
+    setError('')
+    try {
+      const created = await onCreate({ url, customAlias: alias || undefined })
+      setResult(created)
+    } catch (err) {
+      setError(err.message)
+      setResult(null)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -33,6 +41,8 @@ export default function CreateUrlModal({ open, onClose, onCreate }) {
               <input className="input-dark" value={alias} onChange={(e) => setAlias(e.target.value)} placeholder="Alias (optional)" />
               <GradientButton type="submit" disabled={loading}>{loading ? 'Generating...' : 'Generate URL'}</GradientButton>
             </form>
+
+            {error && <p className="mt-3 text-sm text-brand-error">{error}</p>}
 
             {result?.shortUrl && (
               <div className="mt-4 rounded-xl border border-brand-success/30 bg-brand-success/10 p-3 text-sm">

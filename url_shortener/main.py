@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from url_shortener.api.ai import router as ai_router
 from url_shortener.api.analytics import router as analytics_router
 from url_shortener.api.redirect import router as redirect_router
 from url_shortener.api.shorten import router as shorten_router
@@ -77,4 +78,5 @@ async def healthcheck() -> dict[str, str]:
 
 app.include_router(shorten_router, prefix=settings.api_v1_prefix)
 app.include_router(analytics_router, prefix=settings.api_v1_prefix)
+app.include_router(ai_router, prefix=settings.api_v1_prefix)
 app.include_router(redirect_router)

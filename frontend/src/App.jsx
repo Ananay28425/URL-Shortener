@@ -33,7 +33,7 @@ function App() {
           <Routes location={location}>
             <Route path="/" element={<Home />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/analytics/:id" element={<Analytics />} />
+            <Route path="/analytics/:shortCode" element={<Analytics />} />
             <Route path="/login" element={<Login />} />
             <Route path="/home" element={<Navigate to="/" replace />} />
             <Route path="*" element={<NotFound />} />
