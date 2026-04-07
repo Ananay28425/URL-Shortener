@@ -24,17 +24,18 @@ export default function Button({
   size = 'md',
   leftIcon,
   rightIcon,
+  as: Comp = 'button',
   ...props
 }) {
   return (
-    <button
+    <Comp
       className={`inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${SIZES[size] || SIZES.md} ${VARIANTS[variant] || VARIANTS.subtle} ${className}`}
       {...props}
     >
       {leftIcon ? <span className="opacity-90">{leftIcon}</span> : null}
       {children}
       {rightIcon ? <span className="opacity-90">{rightIcon}</span> : null}
-    </button>
+    </Comp>
   )
 }
 
