@@ -9,46 +9,76 @@ import {
   YAxis,
 } from 'recharts'
 import Card from '../ui/Card'
+import {
+  ACCENT,
+  axisLine,
+  axisTick,
+  gridStroke,
+  tooltipContentStyle,
+  tooltipItemStyle,
+  tooltipLabelStyle,
+} from '../../utils/chartHelpers'
 
 export default function GeoChart({ data = [] }) {
   const safe = (data || []).slice(0, 8)
+
+  if (safe.length === 0) {
+    return (
+      <Card className="p-6">
+        <div className="text-sm font-semibold text-white/85">Geo distribution</div>
+        <div className="mt-3 text-sm text-white/45">
+          No country data yet — geo is derived from recent click events.
+        </div>
+      </Card>
+    )
+  }
+
   return (
-    <Card className="p-5">
-      <div className="text-sm font-semibold text-white/80">Geo distribution</div>
-      <div className="mt-1 text-xs text-white/40">Top countries by clicks</div>
-      <div className="mt-4 h-[260px]">
-        <ResponsiveContainer>
-          <BarChart data={safe} layout="vertical" margin={{ left: 8 }}>
-            <CartesianGrid stroke="rgba(255,255,255,0.06)" />
-            <XAxis
-              type="number"
-              tick={{ fill: 'rgba(255,255,255,0.45)', fontSize: 12 }}
-              axisLine={{ stroke: 'rgba(255,255,255,0.10)' }}
-              tickLine={{ stroke: 'rgba(255,255,255,0.10)' }}
-            />
-            <YAxis
-              type="category"
-              dataKey="name"
-              tick={{ fill: 'rgba(255,255,255,0.55)', fontSize: 12 }}
-              axisLine={{ stroke: 'rgba(255,255,255,0.10)' }}
-              tickLine={{ stroke: 'rgba(255,255,255,0.10)' }}
-              width={64}
-            />
-            <Tooltip
-              contentStyle={{
-                background: 'rgba(0,0,0,0.85)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                borderRadius: 12,
-                color: 'white',
-              }}
-              labelStyle={{ color: 'rgba(255,255,255,0.7)' }}
-              itemStyle={{ color: 'white' }}
-            />
-            <Bar dataKey="value" fill="var(--accent)" radius={[10, 10, 10, 10]} />
-          </BarChart>
-        </ResponsiveContainer>
+    <Card className="overflow-hidden p-0">
+      <div className="border-b border-white/10 px-5 py-4">
+        <div className="text-sm font-semibold text-white/85">Geo distribution</div>
+        <div className="mt-1 text-xs text-white/45">Top countries by clicks</div>
+      </div>
+      <div className="p-5">
+        <div className="h-[280px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={safe}
+              layout="vertical"
+              margin={{ top: 4, right: 12, left: 4, bottom: 4 }}
+            >
+              <CartesianGrid stroke={gridStroke} horizontal={false} />
+              <XAxis
+                type="number"
+                tick={axisTick}
+                axisLine={axisLine}
+                tickLine={false}
+              />
+              <YAxis
+                type="category"
+                dataKey="name"
+                tick={axisTick}
+                axisLine={false}
+                tickLine={false}
+                width={72}
+              />
+              <Tooltip
+                contentStyle={tooltipContentStyle}
+                labelStyle={tooltipLabelStyle}
+                itemStyle={tooltipItemStyle}
+                formatter={(value) => [value, 'Clicks']}
+              />
+              <Bar
+                dataKey="value"
+                fill={ACCENT}
+                radius={[0, 10, 10, 0]}
+                barSize={14}
+                animationDuration={400}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </Card>
   )
 }
-

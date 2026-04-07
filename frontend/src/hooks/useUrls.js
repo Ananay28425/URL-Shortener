@@ -20,8 +20,12 @@ export function useUrls() {
   }
 
   async function remove(shortId) {
-    await deleteUrl(shortId)
-    setUrls((s) => s.filter((u) => u.shortId !== shortId))
+    try {
+      await deleteUrl(shortId)
+      setUrls((s) => s.filter((u) => u.shortId !== shortId))
+    } catch (e) {
+      setError(e)
+    }
   }
 
   useEffect(() => {

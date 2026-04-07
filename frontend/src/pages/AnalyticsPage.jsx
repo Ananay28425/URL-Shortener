@@ -11,7 +11,54 @@ import DeviceChart from '../components/analytics/DeviceChart'
 import GeoChart from '../components/analytics/GeoChart'
 import AiInsightCard from '../components/analytics/AiInsightCard'
 import { useAnalytics } from '../hooks/useAnalytics'
-import formatDate from '../utils/formatDate'
+import formatDate, { formatDateTime } from '../utils/formatDate'
+
+function RecentClicks({ events = [] }) {
+  const rows = (events || []).slice(0, 12)
+  if (!rows.length) return null
+  return (
+    <Card className="overflow-hidden p-0">
+      <div className="border-b border-white/10 px-5 py-4">
+        <div className="text-sm font-semibold text-white/85">Recent click events</div>
+        <div className="mt-1 text-xs text-white/45">Latest activity for this short link</div>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="min-w-full text-left text-sm">
+          <thead className="text-xs uppercase tracking-wide text-white/40">
+            <tr>
+              <th className="px-5 py-3">Time</th>
+              <th className="px-5 py-3">Country</th>
+              <th className="px-5 py-3">Referrer</th>
+              <th className="px-5 py-3">Device</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-white/10">
+            {rows.map((c, i) => (
+              <tr key={i} className="hover:bg-white/[0.03]">
+                <td className="whitespace-nowrap px-5 py-3 text-white/70">
+                  {c.timestamp
+                    ? formatDateTime(
+                        typeof c.timestamp === 'string'
+                          ? c.timestamp
+                          : new Date(c.timestamp).toISOString()
+                      )
+                    : '—'}
+                </td>
+                <td className="px-5 py-3 text-white/70">{c.country || '—'}</td>
+                <td className="max-w-[14rem] truncate px-5 py-3 text-white/60">
+                  {c.referer || 'direct'}
+                </td>
+                <td className="px-5 py-3 capitalize text-white/60">
+                  {c.device_type || '—'}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </Card>
+  )
+}
 
 export default function AnalyticsPage() {
   const { shortId } = useParams()
@@ -60,7 +107,8 @@ export default function AnalyticsPage() {
     )
   }
 
-  const shortUrl = `${window.location.origin}/${data.shortId}`
+  const shortUrl =
+    data.shortUrl || `${window.location.origin}/${data.shortId}`
 
   return (
     <div className="space-y-6">
@@ -77,8 +125,15 @@ export default function AnalyticsPage() {
             <div className="mt-1 truncate text-sm text-white/55">
               {data.url || '—'}
             </div>
-            <div className="mt-2 text-xs text-white/40">
-              Created {data.created_at ? formatDate(data.created_at) : '—'}
+            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-white/40">
+              <span>
+                Created {data.created_at ? formatDate(data.created_at) : '—'}
+              </span>
+              {data.last_clicked_at ? (
+                <span>
+                  Last click {formatDate(data.last_clicked_at)}
+                </span>
+              ) : null}
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -94,7 +149,7 @@ export default function AnalyticsPage() {
             <div className="text-xs font-semibold uppercase tracking-wide text-white/40">
               Total requests
             </div>
-            <div className="mt-2 text-2xl font-semibold text-white">
+            <div className="mt-2 text-2xl font-semibold tabular-nums text-white">
               {summary.clicks.toLocaleString()}
             </div>
           </Card>
@@ -102,7 +157,7 @@ export default function AnalyticsPage() {
             <div className="text-xs font-semibold uppercase tracking-wide text-white/40">
               Unique visitors
             </div>
-            <div className="mt-2 text-2xl font-semibold text-white">
+            <div className="mt-2 text-2xl font-semibold tabular-nums text-white">
               {summary.unique.toLocaleString()}
             </div>
           </Card>
@@ -134,8 +189,9 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
+      <RecentClicks events={data.recent_clicks} />
+
       <AiInsightCard insight={data.ai_insight} />
     </div>
   )
 }
-

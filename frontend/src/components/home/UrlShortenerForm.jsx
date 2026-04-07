@@ -5,7 +5,7 @@ import Button from '../ui/Button'
 import Input from '../ui/Input'
 import CopyButton from '../ui/CopyButton'
 import LoadingSpinner from '../ui/LoadingSpinner'
-import { shortenUrl } from '../../services/api'
+import { shortenUrl, generateSmartAlias } from '../../services/api'
 
 function normalizeShortResult(result) {
   if (!result) return { shortId: '', shortUrl: '' }
@@ -13,21 +13,6 @@ function normalizeShortResult(result) {
   const shortUrl =
     result.shortUrl || result.short_url || (shortId ? `${window.location.origin}/${shortId}` : '')
   return { shortId, shortUrl }
-}
-
-function smartAliasFallback(url) {
-  try {
-    const u = new URL(url)
-    const base = (u.hostname + u.pathname)
-      .replace(/^www\./, '')
-      .replace(/[^a-zA-Z0-9]+/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '')
-      .slice(0, 24)
-    return base || Math.random().toString(36).slice(2, 8)
-  } catch {
-    return Math.random().toString(36).slice(2, 8)
-  }
 }
 
 export default function UrlShortenerForm() {
@@ -92,7 +77,10 @@ export default function UrlShortenerForm() {
               type="button"
               variant="subtle"
               leftIcon={<Wand2 size={16} className="text-[var(--accent)]" />}
-              onClick={() => setAlias((a) => a || smartAliasFallback(url.trim()))}
+              onClick={async () => {
+                const next = alias.trim() || (await generateSmartAlias(url.trim()))
+                setAlias(next)
+              }}
             >
               Generate Smart Alias
             </Button>
