@@ -4,7 +4,7 @@ import { Link, useLocation } from 'react-router-dom'
 const items = [
   { to: '/dashboard', icon: Home, label: 'Overview' },
   { to: '/dashboard', icon: Link2, label: 'Links' },
-  { to: '/analytics/demo-1', icon: BarChart3, label: 'Analytics' }
+  { to: '/dashboard', icon: BarChart3, label: 'Analytics' }
 ]
 
 export default function Sidebar({ mobileOpen, onClose }) {

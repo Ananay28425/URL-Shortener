@@ -1,8 +1,7 @@
 from functools import lru_cache
 from pathlib import Path
-from typing import List
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -21,10 +20,6 @@ class Settings(BaseSettings):
     debug: bool = False
     api_v1_prefix: str = "/api/v1"
     base_domain: str = "http://localhost:8000"
-    database_url: str = (
-        "postgresql+asyncpg://postgres:postgres@localhost:5432/url_shortener"
-    )
-    valkey_url: str = "redis://localhost:6379/0"
     short_code_length: int = 6
     max_short_code_length: int = 10
     default_url_ttl_days: int = 365
@@ -35,9 +30,23 @@ class Settings(BaseSettings):
         default_factory=lambda: f"sqlite+aiosqlite:///{Path.cwd() / 'url_shortener.db'}"
     )
     valkey_url: str | None = None
-    allowed_origins: List[str] = Field(
-        default_factory=lambda: ["http://localhost:3000", "http://localhost:8080"]
+    allowed_origins: list[str] = Field(
+        default_factory=lambda: [
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "http://localhost:8080",
+        ]
     )
+
+    @field_validator("allowed_origins", mode="before")
+    @classmethod
+    def parse_allowed_origins(cls, value):
+        if isinstance(value, str):
+            stripped = value.strip()
+            if stripped.startswith("[") and stripped.endswith("]"):
+                return value
+            return [origin.strip() for origin in stripped.split(",") if origin.strip()]
+        return value
 
     def normalized_base_domain(self) -> str:
         return self.base_domain.rstrip("/")

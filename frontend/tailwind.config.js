@@ -5,22 +5,29 @@ export default {
     extend: {
       colors: {
         brand: {
-          bg: '#0B0F19',
-          bgSoft: '#0F172A',
-          bgCard: '#111827',
-          indigo: '#6366F1',
-          purple: '#8B5CF6',
-          cyan: '#06B6D4',
+          bg: '#000000',
+          bgSoft: '#111111',
+          bgCard: '#111111',
+          indigo: '#F38020',
+          purple: '#F38020',
+          cyan: '#F38020',
           success: '#22C55E',
           warning: '#F59E0B',
           error: '#EF4444',
-          text: '#F8FAFC',
-          muted: '#CBD5E1',
-          slate: '#64748B'
+          text: '#E5E7EB',
+          muted: '#A3A3A3',
+          slate: '#737373'
         }
       },
       boxShadow: {
-        glow: '0 0 0 1px rgba(99,102,241,0.3), 0 10px 45px rgba(99,102,241,0.25)'
+        glow: 'none'
+      },
+      borderRadius: {
+        xl: '0.375rem',
+        '2xl': '0.375rem'
+      },
+      fontFamily: {
+        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace']
       }
     }
   },

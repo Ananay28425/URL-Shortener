@@ -5,7 +5,7 @@ export default function FeatureCard({ title, description, icon: Icon }) {
     <motion.article
       whileHover={{ y: -4, borderColor: 'rgba(99, 102, 241, 0.4)' }}
       transition={{ duration: 0.3 }}
-      className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 to-white/2 p-8 transition-all hover:from-white/8 hover:to-white/4"
+      className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 to-white/10 p-8 transition-all hover:from-white/10 hover:to-white/10"
     >
       <div className="mb-6 inline-flex rounded-lg border border-white/15 bg-white/5 p-2.5">
         <Icon size={20} className="text-brand-indigo" />

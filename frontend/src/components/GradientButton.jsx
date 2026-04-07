@@ -1,5 +1,3 @@
-import { motion } from 'framer-motion'
-
 export default function GradientButton({
   children,
   className = '',
@@ -8,15 +6,13 @@ export default function GradientButton({
   ...props
 }) {
   return (
-    <motion.button
+    <button
       type={type}
-      whileTap={{ scale: 0.97 }}
-      whileHover={{ y: -2 }}
       disabled={disabled}
-      className={`rounded-xl bg-gradient-to-r from-brand-indigo via-brand-purple to-brand-cyan px-6 py-3 font-semibold text-white shadow-glow transition-all disabled:cursor-not-allowed disabled:opacity-60 ${className}`}
+      className={`rounded-md border border-[#333333] bg-[#F38020] px-4 py-2 text-xs font-bold uppercase tracking-wide text-black disabled:cursor-not-allowed disabled:opacity-60 ${className}`}
       {...props}
     >
       {children}
-    </motion.button>
+    </button>
   )
 }

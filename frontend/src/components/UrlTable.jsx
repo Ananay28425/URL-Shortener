@@ -8,34 +8,34 @@ export default function UrlTable({ items, onDelete }) {
   return (
     <div className="glass-card overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="min-w-full text-sm">
-          <thead className="border-b border-white/10 bg-white/5 text-left text-brand-slate">
+        <table className="min-w-full text-xs">
+          <thead className="border-b border-[#333333] bg-[#050505] text-left text-brand-slate uppercase tracking-wide">
             <tr>
-              <th className="px-4 py-3 font-medium">Short URL</th>
-              <th className="px-4 py-3 font-medium">Original URL</th>
-              <th className="px-4 py-3 font-medium">Clicks</th>
-              <th className="px-4 py-3 font-medium">Created Date</th>
-              <th className="px-4 py-3 font-medium">Status</th>
-              <th className="px-4 py-3 font-medium">Actions</th>
+              <th className="px-3 py-2 font-medium">Short URL</th>
+              <th className="px-3 py-2 font-medium">Original URL</th>
+              <th className="px-3 py-2 font-medium">Clicks</th>
+              <th className="px-3 py-2 font-medium">Created</th>
+              <th className="px-3 py-2 font-medium">Status</th>
+              <th className="px-3 py-2 font-medium">Actions</th>
             </tr>
           </thead>
           <tbody>
             {items.map((item) => (
-              <tr key={item.id || item.shortId} className="border-b border-white/5">
-                <td className="px-4 py-3 font-mono text-xs sm:text-sm">{item.shortUrl}</td>
-                <td className="px-4 py-3 text-brand-muted">{truncateUrl(item.url, 56)}</td>
-                <td className="px-4 py-3">{item.clicks}</td>
-                <td className="px-4 py-3 text-brand-muted">{formatDate(item.createdAt || item.created_at)}</td>
-                <td className="px-4 py-3">
-                  <span className={`rounded-full px-2 py-1 text-xs ${item.status === 'active' ? 'bg-brand-success/20 text-brand-success' : 'bg-brand-warning/20 text-brand-warning'}`}>
+              <tr key={item.shortCode || item.shortId} className="border-b border-[#1f1f1f]">
+                <td className="px-3 py-2 break-all text-brand-text">{item.shortUrl}</td>
+                <td className="px-3 py-2 text-brand-muted">{truncateUrl(item.url, 56)}</td>
+                <td className="px-3 py-2">{item.clicks}</td>
+                <td className="px-3 py-2 text-brand-muted">{formatDate(item.createdAt || item.created_at)}</td>
+                <td className="px-3 py-2">
+                  <span className={`rounded-md border px-2 py-1 text-[11px] uppercase tracking-wide ${item.status === 'active' ? 'border-brand-success text-brand-success' : 'border-brand-warning text-brand-warning'}`}>
                     {item.status}
                   </span>
                 </td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-2">
+                <td className="px-3 py-2">
+                  <div className="flex items-center gap-1">
                     <CopyButton value={item.shortUrl} compact />
-                    <Link to={`/analytics/${item.shortId}`} className="btn-secondary p-2"><BarChart3 size={14} /></Link>
-                    <button onClick={() => onDelete(item.shortId)} className="btn-secondary p-2 text-brand-error"><Trash2 size={14} /></button>
+                    <Link to={`/analytics/${item.shortCode || item.shortId}`} className="btn-secondary p-2"><BarChart3 size={12} /></Link>
+                    <button onClick={() => onDelete(item.shortCode || item.shortId)} className="btn-secondary p-2 text-brand-error"><Trash2 size={12} /></button>
                   </div>
                 </td>
               </tr>

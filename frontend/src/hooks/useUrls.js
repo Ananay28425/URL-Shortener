@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { deleteUrl, getUrls, shortenUrl } from '../services/api'
+import { deleteUrl, getAllUrls, shortenUrl } from '../services/api'
 
 export default function useUrls() {
   const [urls, setUrls] = useState([])
@@ -7,20 +7,23 @@ export default function useUrls() {
 
   const load = useCallback(async () => {
     setLoading(true)
-    const data = await getUrls()
-    setUrls(data)
-    setLoading(false)
+    try {
+      const data = await getAllUrls()
+      setUrls(data)
+    } finally {
+      setLoading(false)
+    }
   }, [])
 
   const create = useCallback(async (payload) => {
-    const created = await shortenUrl(payload)
+    const created = await shortenUrl(payload.url, payload.customAlias)
     setUrls((prev) => [created, ...prev])
     return created
   }, [])
 
-  const remove = useCallback(async (id) => {
-    await deleteUrl(id)
-    setUrls((prev) => prev.filter((item) => item.shortId !== id))
+  const remove = useCallback(async (shortCode) => {
+    await deleteUrl(shortCode)
+    setUrls((prev) => prev.filter((item) => item.shortCode !== shortCode))
   }, [])
 
   useEffect(() => {
@@ -34,7 +37,7 @@ export default function useUrls() {
       total: urls.length,
       totalClicks,
       active,
-      top: urls.slice().sort((a, b) => b.clicks - a.clicks)[0]?.shortId || '—'
+      top: urls.slice().sort((a, b) => b.clicks - a.clicks)[0]?.shortCode || '—'
     }
   }, [urls])
 

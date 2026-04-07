@@ -1,82 +1,138 @@
-import axios from 'axios'
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000').replace(/\/$/, '')
 
-const baseURL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
+async function parseResponse(response) {
+  if (response.status === 204) return null
 
-const client = axios.create({
-  baseURL: baseURL ? `${baseURL}/api/v1` : '/api/v1',
-  timeout: 7000
-})
+  const contentType = response.headers.get('content-type') || ''
+  if (!contentType.includes('application/json')) {
+    const text = await response.text()
+    if (!response.ok) throw new Error(text || `Request failed with status ${response.status}`)
+    return text
+  }
 
-const mockUrls = [
-  { shortId: 'demo-1', shortUrl: 'https://sho.rt/demo-1', url: 'https://vercel.com/blog/scaling-platforms', clicks: 1382, createdAt: '2026-03-20T08:30:00.000Z', status: 'active' },
-  { shortId: 'api-x7', shortUrl: 'https://sho.rt/api-x7', url: 'https://docs.github.com/en/rest', clicks: 792, createdAt: '2026-03-27T14:10:00.000Z', status: 'active' },
-  { shortId: 'infra99', shortUrl: 'https://sho.rt/infra99', url: 'https://kubernetes.io/docs/concepts/overview/', clicks: 344, createdAt: '2026-02-15T09:45:00.000Z', status: 'paused' }
-]
-
-const mockTrend = [
-  { date: 'Mar 30', clicks: 52 },
-  { date: 'Mar 31', clicks: 68 },
-  { date: 'Apr 01', clicks: 74 },
-  { date: 'Apr 02', clicks: 87 },
-  { date: 'Apr 03', clicks: 102 },
-  { date: 'Apr 04', clicks: 94 },
-  { date: 'Apr 05', clicks: 119 }
-]
-
-export async function shortenUrl(data) {
   try {
-    const response = await client.post('/shorten', data)
-    return response.data
+    return await response.json()
   } catch {
-    const alias = data.customAlias || Math.random().toString(36).slice(2, 8)
-    return {
-      shortId: alias,
-      shortUrl: `https://sho.rt/${alias}`,
-      url: data.url,
-      clicks: 0,
-      createdAt: new Date().toISOString(),
-      status: 'active'
-    }
+    if (!response.ok) throw new Error(`Request failed with status ${response.status}`)
+    return null
   }
 }
 
-export async function getUrls() {
+async function request(path, options = {}) {
+  let response
   try {
-    const response = await client.get('/urls')
-    return response.data
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options.headers || {})
+      },
+      ...options
+    })
   } catch {
-    return mockUrls
+    throw new Error('Unable to reach backend server')
+  }
+
+  const payload = await parseResponse(response)
+  if (!response.ok) {
+    const detail = payload && typeof payload === 'object' && 'detail' in payload ? payload.detail : null
+    throw new Error(detail || `Request failed with status ${response.status}`)
+  }
+  return payload
+}
+
+function mapUrl(item) {
+  return {
+    id: item.short_code,
+    shortCode: item.short_code,
+    shortId: item.short_code,
+    shortUrl: item.short_url,
+    url: item.original_url,
+    originalUrl: item.original_url,
+    createdAt: item.created_at,
+    clicks: item.click_count ?? 0,
+    status: item.is_active === false ? 'inactive' : 'active'
   }
 }
 
-export async function getAnalytics(id) {
-  try {
-    const response = await client.get(`/analytics/${id}`)
-    return response.data
-  } catch {
-    const link = mockUrls.find((item) => item.shortId === id) || mockUrls[0]
-    const total = mockTrend.reduce((acc, point) => acc + point.clicks, 0)
+function toDateLabel(date) {
+  return date.toLocaleDateString('en-US', { month: 'short', day: '2-digit' })
+}
 
-    return {
-      shortId: link.shortId,
-      shortUrl: link.shortUrl,
-      originalUrl: link.url,
-      createdAt: link.createdAt,
-      totalClicks: total,
-      last7Days: mockTrend.reduce((acc, point) => acc + point.clicks, 0),
-      peakDay: mockTrend.reduce((max, point) => (point.clicks > max.clicks ? point : max), mockTrend[0]),
-      avgDaily: Math.round(total / mockTrend.length),
-      trend: mockTrend,
-      topUrls: mockUrls.map((item) => ({ shortId: item.shortId, clicks: item.clicks }))
-    }
+function buildTrend(recentClicks = []) {
+  const today = new Date()
+  const days = []
+  for (let i = 6; i >= 0; i -= 1) {
+    const date = new Date(today)
+    date.setDate(today.getDate() - i)
+    days.push(date)
+  }
+
+  const counts = new Map(days.map((day) => [toDateLabel(day), 0]))
+  recentClicks.forEach((click) => {
+    const key = toDateLabel(new Date(click.timestamp))
+    if (counts.has(key)) counts.set(key, counts.get(key) + 1)
+  })
+
+  return Array.from(counts.entries()).map(([date, clicks]) => ({ date, clicks }))
+}
+
+function toChartList(breakdown = {}) {
+  return Object.entries(breakdown || {}).map(([shortId, clicks]) => ({ shortId, clicks }))
+}
+
+export async function shortenUrl(url, alias) {
+  const payload = await request('/api/v1/shorten', {
+    method: 'POST',
+    body: JSON.stringify({ url, custom_alias: alias || null })
+  })
+  return mapUrl(payload)
+}
+
+export async function getAllUrls() {
+  const payload = await request('/api/v1/shorten')
+  return Array.isArray(payload) ? payload.map(mapUrl) : []
+}
+
+export async function deleteUrl(shortCode) {
+  await request(`/api/v1/shorten/${shortCode}`, { method: 'DELETE' })
+  return { success: true }
+}
+
+export async function getAnalytics(shortCode) {
+  const payload = await request(`/api/v1/analytics/${shortCode}`)
+  const trend = buildTrend(payload.recent_clicks || [])
+  const last7Days = trend.reduce((sum, point) => sum + point.clicks, 0)
+  const peakDay = trend.reduce((max, point) => (point.clicks > max.clicks ? point : max), trend[0] || { date: '—', clicks: 0 })
+
+  return {
+    shortCode: payload.short_code,
+    shortUrl: payload.short_url,
+    originalUrl: payload.original_url,
+    totalClicks: payload.total_clicks ?? 0,
+    last7Days,
+    peakDay,
+    avgDaily: trend.length ? Math.round(last7Days / trend.length) : 0,
+    trend,
+    topUrls: toChartList(payload.top_referrers),
+    browsers: toChartList(payload.browser_breakdown),
+    devices: toChartList(payload.device_breakdown),
+    recentClicks: payload.recent_clicks || []
   }
 }
 
-export async function deleteUrl(id) {
-  try {
-    await client.delete(`/urls/${id}`)
-    return { success: true }
-  } catch {
-    return { success: true }
-  }
+export async function generateSmartAlias() {
+  throw new Error('AI backend route not implemented yet')
+}
+
+export async function getAiInsight() {
+  throw new Error('AI backend route not implemented yet')
+}
+
+export const api = {
+  shorten: shortenUrl,
+  getUrls: getAllUrls,
+  deleteUrl,
+  getAnalytics,
+  generateSmartAlias,
+  getAiInsight
 }
